@@ -39,12 +39,8 @@
                 # Some dependencies are provided by a NUR repo
                 repo.aria-csv
                 repo.autodiff
-                repo.cmake-init
-                repo.cmaketools
                 repo.cpp-sort
                 repo.fast_float
-                repo.eli5
-                repo.pmlb
                 repo.pratt-parser
                 repo.robin-hood-hashing
                 repo.span-lite

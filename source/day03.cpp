@@ -44,28 +44,23 @@ auto day03(int argc, char** argv) -> int
     // part two
     auto oxygen = numbers;
     auto carbon = numbers;
-    while (oxygen.size() > 1 && carbon.size() > 1) {
-        for (size_t i = 0; i < n_bit; ++i) {
-            auto j = n_bit - i - 1;
-            auto m = 1UL << j;
 
-            if (oxygen.size() > 1) {
-                auto count = std::count_if(oxygen.begin(), oxygen.end(), [&](auto v) { return v & (1UL << j); });
-                auto size = oxygen.size();
-                oxygen.erase(std::remove_if(oxygen.begin(), oxygen.end(), [&](auto v) {
-                            auto res = v & (1UL << j);
-                            return count >= (size - count) ? !res : res;
-                            }), oxygen.end());
-            }
+    auto filter = [](auto& vec, auto cond, auto comp, auto i) {
+        auto count = std::count_if(vec.begin(), vec.end(), [&](auto v) { return cond(v, i); });
+        auto size = vec.size();
+        vec.erase(std::remove_if(vec.begin(), vec.end(), [&](auto v) {
+            auto res = cond(v, i);
+            return comp(count, size-count) ? !res : res;
+        }), vec.end());
+    };
 
-            if (carbon.size() > 1) {
-                auto count = std::count_if(carbon.begin(), carbon.end(), [&](auto v) { return !(v & (1UL << j)); });
-                auto size = carbon.size();
-                carbon.erase(std::remove_if(carbon.begin(), carbon.end(), [&](auto v) {
-                            auto res = !(v & (1UL << j));
-                            return count <= (size - count) ? !res : res;
-                            }), carbon.end());
-            }
+    for (size_t i = 0; i < n_bit; ++i) {
+        if (oxygen.size() > 1) {
+            filter(oxygen, [](auto v, auto i) { return v & (1UL << i); }, std::greater_equal<>{}, n_bit - i - 1);
+        }
+
+        if (carbon.size() > 1) {
+            filter(carbon, [](auto v, auto i) { return !(v & (1UL << i)); }, std::less_equal<>{}, n_bit - i - 1);
         }
     }
     ENSURE(oxygen.size() == 1);
