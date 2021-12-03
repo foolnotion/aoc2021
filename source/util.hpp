@@ -22,8 +22,7 @@
 #include <vector>
 #include <type_traits>
 
-#include <gsl/gsl_assert>
-#include <gsl/span>
+#include <gsl/gsl>
 
 #define EXPECT(cond) \
     if(GSL_UNLIKELY(!(cond))) \

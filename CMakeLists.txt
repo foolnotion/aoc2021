@@ -34,6 +34,7 @@ add_library(
     aoc2021_lib OBJECT
     source/day01.cpp
     source/day02.cpp
+    source/day03.cpp
 )
 
 target_include_directories(
