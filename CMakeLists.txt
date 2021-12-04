@@ -10,6 +10,9 @@ project(
     LANGUAGES CXX
 )
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 docs_early_return()
 
 include(cmake/project-is-top-level.cmake)
@@ -35,6 +38,7 @@ add_library(
     source/day01.cpp
     source/day02.cpp
     source/day03.cpp
+    source/day04.cpp
 )
 
 target_include_directories(
