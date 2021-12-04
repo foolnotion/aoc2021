@@ -30,10 +30,8 @@ auto day02(int argc, char** argv) -> int {
     std::vector<command> pairs;
     std::vector<std::string> tokens;
     while (std::getline(infile, line)) {
-        //auto tokens = split(line, ' ');
         util::tokenize(line, ' ', tokens);
         auto res = scn::scan_value<int>(tokens[1]);
-        //auto res = parse_number<int>(tokens[1]);
         ENSURE(res);
         auto it = dex.find(tokens[0]);
         ENSURE(it != dex.end());
