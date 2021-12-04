@@ -43,6 +43,7 @@
                 repo.fast_float
                 repo.pratt-parser
                 repo.robin-hood-hashing
+                repo.scnlib
                 repo.span-lite
                 repo.taskflow
                 repo.vectorclass

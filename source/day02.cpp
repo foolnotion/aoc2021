@@ -1,13 +1,15 @@
 #include "advent.hpp"
 
-#include "robin_hood.h"
+#include <fstream>
+#include <robin_hood.h>
+#include <scn/scn.h>
 
-enum Command { FORWARD, UP, DOWN };
+enum direction { forward, up, down };
 
-const robin_hood::unordered_flat_map<std::string, Command> dex {
-    { "forward", Command::FORWARD },
-    { "up", Command::UP },
-    { "down", Command::DOWN }
+const robin_hood::unordered_flat_map<std::string, direction> dex {
+    { "forward", direction::forward },
+    { "up", direction::up },
+    { "down", direction::down }
 };
 
 auto day02(int argc, char** argv) -> int {
@@ -20,15 +22,18 @@ auto day02(int argc, char** argv) -> int {
     std::ifstream infile(argv[1]);
     std::string line;
 
-    using P = std::pair<Command, int>;
+    using command = std::pair<direction, int>;
 
     int pos{0};
     int depth{0};
 
-    std::vector<P> pairs;
+    std::vector<command> pairs;
+    std::vector<std::string> tokens;
     while (std::getline(infile, line)) {
-        auto tokens = split(line, ' ');
-        auto res = parse_number<int>(tokens[1]);
+        //auto tokens = split(line, ' ');
+        util::tokenize(line, ' ', tokens);
+        auto res = scn::scan_value<int>(tokens[1]);
+        //auto res = parse_number<int>(tokens[1]);
         ENSURE(res);
         auto it = dex.find(tokens[0]);
         ENSURE(it != dex.end());
@@ -42,16 +47,16 @@ auto day02(int argc, char** argv) -> int {
 
     for(auto const& [cmd, val] : pairs) {
         switch(cmd) {
-            case Command::FORWARD:
+            case direction::forward:
                 pos += val;
                 pos2 += val;
                 dep2 += aim2 * val;
                 break;
-            case Command::UP:
+            case direction::up:
                 depth -= val;
                 aim2 -= val;
                 break;
-            case Command::DOWN:
+            case direction::down:
                 depth += val;
                 aim2 += val;
                 break;

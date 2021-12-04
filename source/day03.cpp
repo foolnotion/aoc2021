@@ -1,5 +1,7 @@
 #include "advent.hpp"
 
+#include <fstream>
+#include <gsl/gsl_util>
 #include <string>
 
 constexpr size_t n_bit = 12;
@@ -28,13 +30,13 @@ auto day03(int argc, char** argv) -> int
         // iterate the bits in v
         while(v != 0) {
             auto const x = __builtin_ctzl(v);
-            ++cnt[x];
+            ++cnt.at(x);
             v &= (v-1);
         }
     }
     size_t gamma{0UL};
     for (size_t i = 0; i < cnt.size(); ++i) {
-        if (gsl::at(cnt, static_cast<gsl::index>(i)) >= lines/2) {
+        if (cnt.at(i) >= lines/2) {
             gamma |= size_t{1UL} << i;
         }
     }

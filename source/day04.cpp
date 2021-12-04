@@ -1,5 +1,12 @@
 #include "advent.hpp"
 
+#include <fstream>
+#include <gsl/gsl_util>
+#include <iostream>
+#include <scn/scn.h>
+#include <Eigen/Dense>
+
+
 using board = Eigen::Array<int, -1, -1>;
 
 auto day04(int argc, char** argv) -> int
@@ -14,7 +21,9 @@ auto day04(int argc, char** argv) -> int
 
     // the first line represents the list of input numbers
     std::getline(infile, line);
-    auto numbers = to_vec<int>(line, ',');
+    std::vector<int> numbers;
+    auto res = scn::scan_list(line, numbers, ',');
+    ENSURE(res);
 
     // the remainder of the file contains the board configurations
     int rows = 0;
@@ -28,7 +37,7 @@ auto day04(int argc, char** argv) -> int
                 auto& b = boards.back();
                 for (size_t i = 0; i < values.size(); ++i) {
                     EXPECT(values[i].size() == b.rows());
-                    b.row(gsl::narrow<Eigen::Index>(i)) = as_map(values[i]);
+                    b.row(gsl::narrow<Eigen::Index>(i)) = Eigen::Map<Eigen::Array<int, -1, 1>>(values[i].data(), values[i].size());
                 }
                 rows = 0;
                 values.clear();
@@ -36,7 +45,9 @@ auto day04(int argc, char** argv) -> int
             }
             continue;
         }
-        auto vec = to_vec<int>(line, ' ');
+        std::vector<int> vec;
+        auto res = scn::scan_list(line, vec, ' ');
+        ENSURE(res);
         values.push_back(vec);
         ++rows;
     }
