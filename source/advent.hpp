@@ -38,6 +38,12 @@ inline void tokenize(std::string const& str, char delim, std::vector<std::string
         out.push_back(str.substr(start, end - start));
     }
 }
+
+template<typename T>
+inline auto sgn(T value) -> int
+{
+    return (T{0} < value) - (value < T{0});
+}
 } // namespace util
 
 auto day01(int argc, char** argv) -> int;

@@ -52,6 +52,8 @@ target_include_directories(
 
 target_compile_features(aoc2021_lib PUBLIC cxx_std_17)
 
+target_compile_options(aoc2021_lib PUBLIC "$<$<CONFIG:Release>:-O3;-march=x86-64;-mavx2;-mfma>")
+
 # ---- Declare executable ----
 
 add_executable(aoc2021_aoc2021 source/main.cpp)

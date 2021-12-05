@@ -43,25 +43,13 @@ auto day05(int argc, char** argv) -> int
         auto [x1, y1] = p1;
         auto [x2, y2] = p2;
 
-        if (x1 == x2) { // horizontal
-            map(x1, Eigen::seq(std::min(y1, y2), std::max(y1, y2))) += 1;
-        } else if (y1 == y2) { // vertical
-            map(Eigen::seq(std::min(x1, x2), std::max(x1, x2)), y1) += 1;
-        } else { // diagonal
-            auto xx = std::abs(x1-x2);
-            auto yy = std::abs(y1-y2);
-            if (xx == yy) {
-                Eigen::Array<int, -1, -1> block = decltype(block)::Zero(xx+1, yy+1); 
-                block.matrix().diagonal().array() += 1;
-
-                if (x1 > x2 && y1 < y2) {
-                    map.block(x2, y1, xx+1, yy+1) += block.rowwise().reverse();
-                } else if (x1 < x2 && y1 > y2) {
-                    map.block(x1, y2, xx+1, yy+1) += block.colwise().reverse();
-                } else {
-                    map.block(std::min(x1, x2), std::min(y1, y2), xx+1, yy+1) += block;
-                }
+        if (x1 == x2 || y1 == y2 || std::abs(x1-x2) == std::abs(y1-y2)) {
+            auto dx = util::sgn(x2-x1);
+            auto dy = util::sgn(y2-y1);
+            for (auto x = x1, y = y1; (dx == 0 || x != x2) && (dy == 0 || y != y2); x += dx, y += dy) {
+                map(x, y) += 1;
             }
+            map(x2, y2) += 1;
         }
     }
     auto count = (map > 1).count();
