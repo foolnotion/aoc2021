@@ -40,6 +40,7 @@ add_library(
     source/day02.cpp
     source/day03.cpp
     source/day04.cpp
+    source/day05.cpp
 )
 
 target_include_directories(
