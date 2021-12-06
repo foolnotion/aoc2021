@@ -10,7 +10,7 @@ project(
     LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 docs_early_return()
@@ -41,6 +41,7 @@ add_library(
     source/day03.cpp
     source/day04.cpp
     source/day05.cpp
+    source/day06.cpp
 )
 
 target_include_directories(
@@ -50,7 +51,7 @@ target_include_directories(
     ${EIGEN3_INCLUDE_DIR}
 )
 
-target_compile_features(aoc2021_lib PUBLIC cxx_std_17)
+target_compile_features(aoc2021_lib PUBLIC cxx_std_20)
 
 target_compile_options(aoc2021_lib PUBLIC "$<$<CONFIG:Release>:-O3;-march=x86-64;-mavx2;-mfma>")
 
@@ -65,7 +66,7 @@ set_target_properties(
     EXPORT_NAME aoc2021
 )
 
-target_compile_features(aoc2021_aoc2021 PRIVATE cxx_std_17)
+target_compile_features(aoc2021_aoc2021 PRIVATE cxx_std_20)
 
 target_link_libraries(aoc2021_aoc2021 PRIVATE aoc2021_lib fmt::fmt Microsoft.GSL::GSL scn::scn)
 
