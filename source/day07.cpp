@@ -46,11 +46,14 @@ auto day07(int argc, char** argv) -> int
     auto sum = [](auto n) { return n * (n + 1) / 2; };
 
     i64 min_cost = std::numeric_limits<i64>::max();
-    i64 min_pos = pos.back();
-    for (auto i : iota(0, pos.back())) {
+    i64 min_pos = 0;
+    for (auto i : iota(gsl::narrow<i64>(std::floor(mean-1)), gsl::narrow<i64>(std::ceil(mean+1)))) {
         auto costs2 = pos | transform([&](auto p) { return sum(std::abs(i - p)); });
-        min_cost = std::min(min_cost, std::accumulate(costs2.begin(), costs2.end(), i64 { 0 }));
-        min_pos = i;
+        auto cost = std::accumulate(costs2.begin(), costs2.end(), i64 { 0 });
+        if (min_cost > cost) {
+            min_cost = cost;
+            min_pos = i;
+        }
     }
     fmt::print("part 2: {} (pos = {})\n", min_cost, min_pos);
 
