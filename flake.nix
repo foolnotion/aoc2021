@@ -20,7 +20,7 @@
             name = "aoc-2021-env";
             hardeningDisable = [ "all" ];
             impureUseNativeOptimizations = true;
-            nativeBuildInputs = with pkgs; [ bear cmake clang_12 clang-tools cppcheck ];
+            nativeBuildInputs = with pkgs; [ bear cmake clang_13 clang-tools cppcheck ];
             buildInputs = with pkgs; [
                 # python environment for bindings and scripting
                 diff-so-fancy

@@ -25,6 +25,11 @@
         gsl::details::terminate();                                         \
     }
 
+using i32 = int32_t;
+using i64 = int64_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+
 namespace util {
 inline void tokenize(std::string const& str, char delim, std::vector<std::string>& out)
 {
@@ -52,5 +57,6 @@ auto day03(int argc, char** argv) -> int;
 auto day04(int argc, char** argv) -> int;
 auto day05(int argc, char** argv) -> int;
 auto day06(int argc, char** argv) -> int;
+auto day07(int argc, char** argv) -> int;
 
 #endif
