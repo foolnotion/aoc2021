@@ -99,6 +99,7 @@ auto day09(int argc, char** argv) -> int
     // part2
     // we simply most perform a BFS (wave propagation)
     vector<u64> basin_sizes;
+    basin_sizes.reserve(low_points.size());
     decltype(map) visited = decltype(map)::Zero(map.rows(), map.cols());
     queue<pair<i64, i64>> q;
 
