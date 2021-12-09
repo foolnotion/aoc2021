@@ -27,9 +27,6 @@ constexpr inline auto bitconv(string_view s) -> u64 {
     return x;
 }
 
-constexpr inline auto trz(auto x) { return __builtin_ctzl(x); }
-constexpr inline auto popcnt(auto x) { return __builtin_popcount(x); }
-
 constexpr array<u64, ndigit> bit {
     bitconv(enc[0]),
     bitconv(enc[1]),
@@ -128,7 +125,7 @@ auto day08(int argc, char** argv) -> int
         auto search = [&](int n, auto&& self) -> std::optional<u64> {
             if (n == nseg) { return validate(map, outs); }
             for (auto x = seg[n]; x != 0; x &= (x-1)) {
-                auto z = trz(x);
+                auto z = __builtin_ctzl(x);
                 if (visited[z]) { continue; }
                 map[z] = n;
                 visited[z] = true;
