@@ -141,6 +141,9 @@ auto day08(int argc, char** argv) -> int
                     // this segment is not active in any of this group's digits,
                     // therefore it cannot be mapped to any of the letters describing this group
                     seg[j] &= ~v;
+                } else if (s == 1) {
+                    // the digit is uniquely identified
+                    seg[j] &= v;
                 }
             }
         }
