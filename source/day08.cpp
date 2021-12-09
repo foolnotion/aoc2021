@@ -9,22 +9,18 @@
 #include <ranges>
 #include <scn/scn.h>
 #include <vector>
-#include <stack>
 
 using std::array;
 using std::ifstream;
-using std::stack;
 using std::string;
 using std::string_view;
 using std::vector;
 using std::views::iota;
 
-constexpr u64 nseg = 7;
-constexpr u64 ndigit = 10;
+constexpr u64 nseg = 7;    // number of segments
+constexpr u64 ndigit = 10; // number of digits
 
-constexpr array<i64, ndigit> digit_nseg { 6, 2, 5, 5, 4, 5, 6, 3, 7, 6 }; // digit segments
 constexpr array<char const*, ndigit> enc { "abcefg", "cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg" };
-
 constexpr inline auto bitconv(string_view s) -> u64 {
     u64 x{0};
     for (auto c : s) { x |= 1UL << static_cast<u64>(c - 'a'); }
@@ -49,8 +45,6 @@ constexpr array<u64, ndigit> bit {
 
 auto day08(int argc, char** argv) -> int
 {
-    ENSURE(bit[0] == 0b1110111);
-    ENSURE(bit[1] == 0b0100100);
     if (argc < 2) {
         fmt::print("Error: no input.");
         return 1;
@@ -76,52 +70,35 @@ auto day08(int argc, char** argv) -> int
         scn::scan_list(tokens[1], tmp, ' ');
         outputs.emplace_back(tmp.begin(), tmp.end());
     }
-
     ENSURE(signals.size() == outputs.size()); 
 
-    auto is_uniq = [](auto n) { return n == digit_nseg[1] || n == digit_nseg[4] || n == digit_nseg[7] || n == digit_nseg[8]; }; // NOLINT
-
     // part1
+    auto is_uniq = [](auto n) { return n == 2 || n == 3 || n == 4 || n == 7; }; // NOLINT
     auto part1 = std::transform_reduce(outputs.begin(), outputs.end(), 0UL, std::plus<>{}, [&](auto& out) {
         return std::count_if(out.begin(), out.end(), [&](auto const& s) { return is_uniq(s.size()); });
     });
     fmt::print("part 1: {}\n", part1);
 
     // part2
-    vector<u64> vec(enc.size());
-
-    auto size_to_digit = [](auto sz) {
-        if (sz == 2) { return 1; } // NOLINT
-        if (sz == 3) { return 7; } // NOLINT
-        if (sz == 4) { return 4; } // NOLINT
-        if (sz == 7) { return 8; } // NOLINT
-        return 0;
-    };
-
-    auto pred = [](auto const& a, auto const& b) { return a.first == b.first; };
-    auto to_char = [](auto v) { return static_cast<char>('a' + v); };
-
     auto validate = [&](auto const& chain, auto const& out) -> std::optional<u64> {
         u64 s{0};
-        u64 j{0};
-        for (auto const& str : out) {
+        for (auto i : iota(0UL, out.size())) {
             u64 x{0};
             u64 v{0};
-            for (auto c : str) {
+            for (auto c : out[i]) {
                 x |= (1UL << chain[static_cast<u64>(c - 'a')]);
             }
             const auto *it = std::find(std::begin(bit), std::end(bit), x); 
             if (it == bit.end()) {
                 return { };
             }
-            auto p = std::distance(std::begin(bit), it) * std::pow(10, (out.size() - j - 1));
+            auto p = std::distance(std::begin(bit), it) * std::pow(10, (out.size() - i - 1)); // NOLINT
             s += p; 
-            ++j;
         }
         return { s };
     };
 
-    vector<vector<u64>> size_groups = {
+    vector<vector<u64>> size_groups {
         {}, {}, {1}, {7}, {4}, {2, 3, 5}, {0, 6, 9}, {8} // NOLINT
     };
 
@@ -138,12 +115,9 @@ auto day08(int argc, char** argv) -> int
 
             for(auto j : iota(0UL, nseg)) {
                 if (std::none_of(g.begin(), g.end(), [&](auto x) { return bit[x] & (1UL << j); })) {
-                    // this segment is not active in any of this group's digits,
-                    // therefore it cannot be mapped to any of the letters describing this group
-                    seg[j] &= ~v;
+                    seg[j] &= ~v; // this segment is not active in any of this group's digits
                 } else if (s == 1) {
-                    // the digit is uniquely identified
-                    seg[j] &= v;
+                    seg[j] &= v; // the digit is uniquely identified
                 }
             }
         }
@@ -164,8 +138,9 @@ auto day08(int argc, char** argv) -> int
             }
             return std::nullopt;
         };
-
-        return search(0, search);
+        auto res = search(0, search);
+        ENSURE(res);
+        return res;
     };
 
     u64 sum{0};
