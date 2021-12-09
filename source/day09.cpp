@@ -65,9 +65,6 @@ auto day09(int argc, char** argv) -> int
         if (i == 0) {
             x = i;
             sx = 2;
-        } else if (x == map.rows() - 1) {
-            x = i - 1;
-            sx = 2;
         } else {
             x = i - 1;
             sx = std::min(3L, map.rows() - x);
@@ -78,9 +75,6 @@ auto day09(int argc, char** argv) -> int
             i64 sy { 0 };
             if (j == 0) {
                 y = j;
-                sy = 2;
-            } else if (y == map.rows() - 1) {
-                y = j - 1;
                 sy = 2;
             } else {
                 y = j - 1;
