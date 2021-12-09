@@ -91,21 +91,20 @@ auto day09(int argc, char** argv) -> int
     fmt::print("part 1: {}\n", part1);
 
     // part2
-    // we simply most perform a BFS (wave propagation)
+    // we simply do a fill flood 
     vector<u64> basin_sizes;
     basin_sizes.reserve(low_points.size());
     decltype(map) visited = decltype(map)::Zero(map.rows(), map.cols());
     queue<pair<i64, i64>> q;
 
     auto visit = [&](auto i, auto j) {
-        if (visited(i, j)) {
-            return;
-        }
+        if (visited(i, j)) { return; }
         visited(i, j) = 1;
         q.push({ i, j });
     };
 
     const i64 max_height = 9;
+    auto valid = [max_height](auto x, auto v) { return x > v && x < max_height; };
 
     for (auto [i, j] : low_points) {
         visit(i, j);
@@ -117,18 +116,10 @@ auto day09(int argc, char** argv) -> int
             auto v = map(x, y);
             ++sz;
 
-            if (x > 0 && map(x - 1, y) > v && map(x - 1, y) < max_height) {
-                visit(x - 1, y);
-            }
-            if (x < map.rows() - 1 && map(x + 1, y) > v && map(x + 1, y) < max_height) {
-                visit(x + 1, y);
-            }
-            if (y > 0 && map(x, y - 1) > v && map(x, y - 1) < max_height) {
-                visit(x, y - 1);
-            }
-            if (y < map.cols() - 1 && map(x, y + 1) > v && map(x, y + 1) < max_height) {
-                visit(x, y + 1);
-            }
+            if (x > 0 && valid(map(x-1, y), v))              { visit(x-1, y); }
+            if (x < map.rows() - 1 && valid(map(x+1, y), v)) { visit(x+1, y); }
+            if (y > 0 && valid(map(x, y-1), v))              { visit(x, y-1); }
+            if (y < map.cols() - 1 && valid(map(x, y+1), v)) { visit(x, y+1); }
         }
         basin_sizes.push_back(sz);
     }
