@@ -106,15 +106,14 @@ auto day08(int argc, char** argv) -> int
         }
         vector<u64> seg(nseg, bit[8]); // NOLINT
 
-        for (auto i : iota(0UL, values.size())) {
-            auto [v, s] = values[i];
+        for (auto [v, s] : values) {
             auto const& g = size_groups[s];
 
-            for(auto j : iota(0UL, nseg)) {
-                if (std::none_of(g.begin(), g.end(), [&](auto x) { return bit[x] & (1UL << j); })) {
-                    seg[j] &= ~v; // this segment is not active in any of this group's digits
+            for(auto i : iota(0UL, nseg)) {
+                if (std::none_of(g.begin(), g.end(), [&](auto x) { return bit[x] & (1UL << i); })) {
+                    seg[i] &= ~v; // this segment is not active in any of this group's digits
                 } else if (s == 1) {
-                    seg[j] &= v; // the digit is uniquely identified
+                    seg[i] &= v; // the digit is uniquely identified
                 }
             }
         }
@@ -133,7 +132,7 @@ auto day08(int argc, char** argv) -> int
                 if (res) { return res; }
                 visited[z] = false;
             }
-            return std::nullopt;
+            return { };
         };
         auto res = search(0, search);
         ENSURE(res);
