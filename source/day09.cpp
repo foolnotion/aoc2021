@@ -60,29 +60,13 @@ auto day09(int argc, char** argv) -> int
     // part1
     vector<point> low_points;
     for (auto i : iota(0, map.rows())) {
-        i64 x { 0 };
-        i64 sx { 0 };
-        if (i == 0) {
-            x = i;
-            sx = 2;
-        } else {
-            x = i - 1;
-            sx = std::min(3L, map.rows() - x);
-        }
+        auto x = std::max(0, i-1);
+        auto sx = std::min(3L - (i == 0), map.rows() - x);
 
         for (auto j : iota(0, map.cols())) {
-            i64 y { 0 };
-            i64 sy { 0 };
-            if (j == 0) {
-                y = j;
-                sy = 2;
-            } else {
-                y = j - 1;
-                sy = std::min(3L, map.cols() - y);
-            }
-
-            auto b = map.block(x, y, sx, sy);
-            if ((b <= map(i, j)).count() == 1) {
+            auto y = std::max(0, j-1);
+            auto sy = std::min(3L - (j == 0), map.cols() - y);
+            if ((map.block(x, y, sx, sy) <= map(i, j)).count() == 1) {
                 low_points.emplace_back(i, j);
             }
         }
