@@ -72,7 +72,7 @@ auto day11(int argc, char** argv) -> int
     i64 part2{0};
     const i64 part1_steps{100};
 
-    for (auto s = 1UL; ; ++s) {
+    for (auto s = 1L; ; ++s) {
         flashed.fill(0);
         map += 1;
 
