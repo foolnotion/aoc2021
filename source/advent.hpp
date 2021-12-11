@@ -61,5 +61,6 @@ auto day07(int argc, char** argv) -> int;
 auto day08(int argc, char** argv) -> int;
 auto day09(int argc, char** argv) -> int;
 auto day10(int argc, char** argv) -> int;
+auto day11(int argc, char** argv) -> int;
 
 #endif
