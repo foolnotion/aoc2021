@@ -25,28 +25,30 @@ constexpr i64 energy_level = 9;
 auto get_block(auto& m, auto i, auto j) -> std::tuple<i64, i64, i64, i64> {
     auto x = std::max(0L, i-1);
     auto y = std::max(0L, j-1);
-
     return std::make_tuple(x, y,
             std::min(3L - (i == 0), m.rows() - x),
             std::min(3L - (j == 0), m.cols() - y));
 }
 
 auto flash(auto& m, auto& f, auto i, auto j) {
-    if (f(i, j)) { return; }
-    if (m(i, j) > energy_level) {
-        f(i, j) = 1;
-        auto [x, y, w, h] = get_block(m, i, j);
-        m.block(x, y, w, h) += 1;
-        for (auto ii = x; ii < x + w; ++ii) {
-            for (auto jj = y; jj < y + h; ++jj) {
-                flash(m, f, ii, jj);
-            }
+    if (f(i, j) || m(i, j) <= energy_level) { return; }
+    f(i, j) = 1;
+    auto [x, y, w, h] = get_block(m, i, j);
+    m.block(x, y, w, h) += 1;
+    for (auto ii = x; ii < x + w; ++ii) {
+        for (auto jj = y; jj < y + h; ++jj) {
+            flash(m, f, ii, jj);
         }
     }
 };
 
 auto day11(int argc, char** argv) -> int
 {
+    if (argc < 2) {
+        fmt::print("Error: no input.");
+        return 1;
+    }
+
     ifstream infile(argv[1]); // NOLINT
     string line;
     std::getline(infile, line);
@@ -64,15 +66,15 @@ auto day11(int argc, char** argv) -> int
         ++row;
     }
 
-    vector<pair<i64, i64>> flash_sources;
-
-    i64 const steps = 1000;
+    decltype(map) flashed = decltype(map)::Zero(map.rows(), map.cols());
 
     i64 part1{0};
     i64 part2{0};
-    for (auto s : iota(0L, steps)) {
+    const i64 part1_steps{100};
+
+    for (auto s = 1UL; ; ++s) {
+        flashed.fill(0);
         map += 1;
-        decltype(map) flashed = decltype(map)::Zero(map.rows(), map.cols());
 
         for (auto i : iota(0L, map.rows())) {
             for (auto j : iota(0L, map.cols())) {
@@ -81,9 +83,11 @@ auto day11(int argc, char** argv) -> int
         }
         map = (map > energy_level).select(0, map);
         auto flashes = (map == 0).count();
-        part1 += flashes;
+        if (s <= part1_steps) {
+            part1 += flashes;
+        }
         if (flashes == map.size()) {
-            part2 = s+1;
+            part2 = s;
             break;
         }
     }
