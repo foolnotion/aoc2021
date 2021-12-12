@@ -56,19 +56,19 @@ auto day12(int argc, char** argv) -> int
             ++visited[l];
         }
 
-        s += "," + l;
+        s += l;
 
         if (l == "end") {
-            auto [_, ins] = paths.insert(s);
+            paths.insert(s);
             return;
         }
 
-        if (!map.contains(l)) {
-            if (small(l)) { --visited[l]; }
+        auto it = map.find(l);
+        if (it == map.end()) {
             return;
         }
 
-        for (auto const& d : map.at(l)) {
+        for (auto const& d : it->second) {
             if (d == "start") { continue; }
             rec(d, s, rec);
         }
