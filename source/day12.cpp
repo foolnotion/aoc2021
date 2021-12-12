@@ -46,7 +46,7 @@ auto day12(int argc, char** argv) -> int
 
     flat_set<std::string> paths;
     auto small = [](auto const& l) { return l != "start" && l != "end" && std::islower(l[0]); };
-    
+
     constexpr i64 max_visit = 2;
     auto find_path = [&](std::string const& l, std::string s, auto&& rec) {
         if (small(l)) {
@@ -81,9 +81,7 @@ auto day12(int argc, char** argv) -> int
     find_path("start", "", find_path);
     fmt::print("part 1: {}\n", paths.size());
 
-    i64 part2{0};
     paths.clear();
-
     for (auto const& [s, v] : visited) {
         if (!small(s)) {
             continue;
