@@ -3,16 +3,10 @@
 #include <fstream>
 #include <robin_hood.h>
 #include <utility>
-#include <vector>
-#include <ranges>
-#include <deque>
 
-using std::deque;
 using std::ifstream;
-using std::pair;
 using std::string;
 using std::vector;
-using std::ranges::views::iota;
 
 template<typename Key>
 using flat_set = robin_hood::unordered_flat_set<Key>;
@@ -48,7 +42,7 @@ auto day12(int argc, char** argv) -> int
     auto small = [](auto const& l) { return l != "start" && l != "end" && std::islower(l[0]); };
 
     constexpr i64 max_visit = 2;
-    auto find_path = [&](std::string const& l, std::string s, auto&& rec) {
+    auto find_path = [&](std::string const& l, std::string s, auto&& find_path) {
         if (small(l)) {
             if (visited[l] == max_visit) {
                 return;
@@ -70,7 +64,7 @@ auto day12(int argc, char** argv) -> int
 
         for (auto const& d : it->second) {
             if (d == "start") { continue; }
-            rec(d, s, rec);
+            find_path(d, s, find_path);
         }
 
         if (small(l)) {
