@@ -62,6 +62,18 @@ auto day08(int argc, char** argv) -> int;
 auto day09(int argc, char** argv) -> int;
 auto day10(int argc, char** argv) -> int;
 auto day11(int argc, char** argv) -> int;
-auto day12(int argc, char** argv) -> int;
+auto day13(int argc, char** argv) -> int;
+auto day14(int argc, char** argv) -> int;
+auto day15(int argc, char** argv) -> int;
+auto day16(int argc, char** argv) -> int;
+auto day17(int argc, char** argv) -> int;
+auto day18(int argc, char** argv) -> int;
+auto day19(int argc, char** argv) -> int;
+auto day20(int argc, char** argv) -> int;
+auto day21(int argc, char** argv) -> int;
+auto day22(int argc, char** argv) -> int;
+auto day23(int argc, char** argv) -> int;
+auto day24(int argc, char** argv) -> int;
+auto day25(int argc, char** argv) -> int;
 
 #endif
