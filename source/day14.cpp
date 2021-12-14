@@ -61,7 +61,8 @@ auto day14(int argc, char** argv) -> int
         for (auto const& [k, v] : rules) {
             auto a = idx(k[0]);
             auto b = idx(k[1]);
-                if (cnt(a, b) > 0) {
+
+            if (cnt(a, b) > 0) {
                 auto c = idx(rules[k]);
                 tmp(a, c) += cnt(a, b);
                 tmp(c, b) += cnt(a, b);
@@ -72,16 +73,28 @@ auto day14(int argc, char** argv) -> int
     }
     i64 min_count{std::numeric_limits<i64>::max()};
     i64 max_count{0};
+    i64 most_common{0};
+    i64 least_common{0};
     for (i64 i = 0; i != cnt.rows(); ++i) {
-        auto row = cnt.row(i);
-        auto sum = row.sum();
+        auto sum = cnt.col(i).sum();
         if (sum > 0) {
-            min_count = std::min(min_count, sum);
-            max_count = std::max(max_count, sum);
+            if (sum == cnt(i, i)) {
+                sum += 1; // add 1 when the string is just one single repeated letter
+            }
+            if (min_count > sum) {
+                min_count = sum;
+                least_common = i;
+            }
+            if (max_count < sum) {
+                max_count = sum;
+                most_common = i;
+            }
         }
     }
-    fmt::print("min: {}, max: {}\n", min_count, max_count);
-    fmt::print("part 2: {}\n", max_count - min_count + 1);
+    fmt::print("least common: {:c}, most common: {:c}\n", static_cast<char>(least_common) + 'a', static_cast<char>(most_common) + 'a');
+    fmt::print("min: {} ({}), max: {} ({})\n", min_count, cnt(least_common, least_common), max_count, cnt(most_common, most_common));
+    fmt::print("string length: {}\n", cnt.sum() + 1);
+    fmt::print("part 2: {}\n", max_count - min_count);
 
     return 0;
 }
