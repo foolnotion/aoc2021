@@ -66,18 +66,17 @@ auto day15(int argc, char** argv) -> int
 
     auto astar = [&](auto start, auto end, auto&& cost) {
         priority_queue<item> q; 
-        q.push({start, 0L});
+        q.push({start, cost(start)});
 
         costs.fill(-1);
         costs(start.x, start.y) = cost(start);
 
         while (!q.empty()) {
-            auto [current, prio] = q.top(); q.pop();
-            if (current == end) {
+            auto [p, c] = q.top(); q.pop();
+            if (p == end) {
                 break;
             }
-            auto [x, y] = current;
-            auto c = costs(x, y);
+            auto [x, y] = p;
             for (auto i = std::max(0L, x-1); i <= std::min(end.x, x+1); ++i) {
                 for (auto j = std::max(0L, y-1); j <= std::min(end.y, y+1); ++j) {
                     if ((i == x && j == y) || (i != x && j != y)) {
