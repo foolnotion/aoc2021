@@ -8,16 +8,7 @@
 #include <fmt/ranges.h>
 #include <scn/scn.h>
 
-enum packet_type {
-    sum = 0,
-    mul = 1,
-    min = 2,
-    max = 3,
-    lit = 4,
-    gt = 5,
-    lt = 6,
-    eq = 7
-};
+enum packet_type { sum, mul, min, max, lit, gt, lt, eq };
 
 struct bitcode {
     static constexpr u64 group_size = 5;
@@ -26,14 +17,10 @@ struct bitcode {
     using res_t = std::pair<i64, u64>;
 
     static auto parse_lit(std::string_view sv) -> res_t {
-        auto ss = sv;
         fmt::memory_buffer buf;
-
         u64 parsed_bits{0};
         i64 v{0};
-
         char c{'0'};
-
         do {
             c = sv[0];
             scn::scan(sv.substr(1, group_size-1), "{:b2}", v);
@@ -52,40 +39,22 @@ struct bitcode {
         sv.remove_prefix(1);
         u64 parsed_bits{1};
         std::vector<i64> values;
-        if (id) {
-            // the next 11 bits are a number that represents the number
-            // of sub-packets immediately contained by this packet 
-            constexpr auto ns_bits = 11UL; // bits representing the number of subpackets
-            u64 ns{0}; scn::scan(sv.substr(0, ns_bits), "{:b2}", ns); // NOLINT
-            parsed_bits += ns_bits;
-            sv.remove_prefix(ns_bits);
-            u64 bits{0};
-            for (auto i = 0UL; i < ns; ++i) {
-                ENSURE(sv.size() >= bits);
-                sv.remove_prefix(bits);
-                auto [v, b] = parse(sv);
-                bits = b;
-                values.push_back(v);
-                parsed_bits += bits;
-            }
-        } else {
-            // the next 15 bits are a number that represents the total length
-            // in bits of the sub-packets contained by this packet
-            constexpr auto len_bits = 15UL; // bits representing the total number of subpacket bits
-            u64 len{0}; scn::scan(sv.substr(0, len_bits), "{:b2}", len);
-            parsed_bits += len_bits;
-            sv.remove_prefix(len_bits);
-            u64 bits{0};
-            while (len) {
-                ENSURE(sv.size() > bits);
-                sv.remove_prefix(bits);
-                auto [v, b] = parse(sv);
-                bits = b;
-                len -= bits;
-                values.push_back(v);
-                parsed_bits += bits;
-            }
+        constexpr auto field_bits_id0 = 15UL;
+        constexpr auto field_bits_id1 = 11UL;
+        const auto field_bits = id ? field_bits_id1 : field_bits_id0;
+        u64 n{0}; scn::scan(sv.substr(0, field_bits), "{:b2}", n);
+        parsed_bits += field_bits;
+        sv.remove_prefix(field_bits);
+        u64 bits{0};
+
+        for (auto i = 0UL; i < n; i += id ? 1 : bits) {
+            sv.remove_prefix(bits);
+            auto [v, b] = parse(sv);
+            bits = b;
+            values.push_back(v);
+            parsed_bits += bits;
         }
+
         i64 value{0};
         switch(opcode) {
             case packet_type::sum: {
@@ -120,6 +89,7 @@ struct bitcode {
                 break;
             }
             default: {
+                break;
             }
         }
         return { value, parsed_bits };
@@ -133,20 +103,12 @@ struct bitcode {
         u64 type{0}; scn::scan(sv.substr(3, 3), "{:b2}", type);
         
         version_sum += version;
-
         sv.remove_prefix(header_size);
         u64 parsed_bits{header_size};
         i64 value{0};
-
-        if (type == packet_type::lit) {
-            auto [v, b] = parse_lit(sv);
-            value = v;
-            parsed_bits += b;
-        } else {
-            auto [v, b] = parse_op(sv, type);
-            value = v;
-            parsed_bits += b;
-        }
+        auto [v, b] = type == packet_type::lit ? parse_lit(sv) : parse_op(sv, type);
+        value = v;
+        parsed_bits += b;
         return { value, parsed_bits };
     }
 
