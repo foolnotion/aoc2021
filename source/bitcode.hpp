@@ -34,7 +34,6 @@ struct bitcode {
     }
 
     auto parse_op(std::string_view sv, u64 opcode) -> res_t {
-        auto ss = sv;
         u64 id{0}; scn::scan(sv.substr(0, 1), "{:b2}", id);
         sv.remove_prefix(1);
         u64 parsed_bits{1};
@@ -96,9 +95,6 @@ struct bitcode {
     }
 
     auto parse(std::string_view sv) -> res_t {
-        if (std::all_of(sv.begin(), sv.end(), [](auto c) { return c == '0'; })) {
-            return { 0, sv.size() };
-        }
         u64 version{0}; scn::scan(sv.substr(0, 3), "{:b2}", version);
         u64 type{0}; scn::scan(sv.substr(3, 3), "{:b2}", type);
         
