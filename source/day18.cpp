@@ -203,7 +203,7 @@ auto expr::reduce() -> expr& {
 
         // look for expressions to explode
         for (auto i = 0L; i < size(); ++i) {
-            auto &n = nodes[i];
+            auto n = nodes[i];
             if (n.length > 1 && n.depth > 4) {
                 auto a = *nodes[i+1].value;
                 auto b = *nodes[i+2].value;
@@ -213,13 +213,11 @@ auto expr::reduce() -> expr& {
                 auto right = find_right(i);
 
                 ENSURE(left > -1 || right > -1);
-                auto tmp = nodes;
-                if (left >= 0) { *tmp[left].value += a; }
-                if (right >= 0) { *tmp[right].value += b; }
-                tmp[i] = node(0);
-                tmp.erase(tmp.begin()+i+1, tmp.begin()+i+n.length);
-                expr e(tmp);
-                nodes.swap(e.nodes);
+                if (left >= 0) { *nodes[left].value += a; }
+                if (right >= 0) { *nodes[right].value += b; }
+                nodes[i] = node(0);
+                nodes.erase(nodes.begin()+i+1, nodes.begin()+i+n.length);
+                update();
                 reduced = true;
                 break;
             }
@@ -228,15 +226,13 @@ auto expr::reduce() -> expr& {
         // look for value-expressions to split
         if (!reduced) {
             for (auto i = 0L; i < size(); ++i) {
-                auto& n = nodes[i];
+                auto n = nodes[i];
                 if (n.value && *n.value > 9) { // NOLINT
                     auto [a,b] = split(*n.value);
-                    auto tmp = nodes;
-                    tmp[i].value = std::nullopt;
-                    tmp.insert(tmp.begin()+i+1, node(a));
-                    tmp.insert(tmp.begin()+i+2, node(b));
-                    expr e(tmp);
-                    nodes.swap(e.nodes);
+                    nodes[i].value = std::nullopt;
+                    nodes.insert(nodes.begin()+i+1, node(a));
+                    nodes.insert(nodes.begin()+i+2, node(b));
+                    update();
                     reduced = true;
                     break;
                 }
