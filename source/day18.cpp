@@ -100,7 +100,7 @@ struct expr {
 
     auto magnitude() -> i64;
 
-    auto update() -> expr {
+    auto update() -> expr& {
         // update length
         for(auto i = size() - 1; i >= 0; --i) {
             auto& n = nodes[i];
@@ -143,6 +143,25 @@ struct expr {
         nodes.swap(tmp.nodes);
         return *this;
     }
+
+    [[nodiscard]] auto find_left(i64 i) const -> i64 {
+        for (auto j = i-1; j >= 0; --j) {
+            if (nodes[j].value) {
+                return j;
+            }
+        }
+        return -1;
+    }
+
+    [[nodiscard]] auto find_right(i64 i) const -> i64 {
+        auto const& n = nodes[i];
+        for (auto j = i+n.length; j < size(); ++j) {
+            if (nodes[j].value) {
+                return j;
+            }
+        }
+        return -1;
+    }
 };
 
 // helper for pretty printing
@@ -182,7 +201,7 @@ auto expr::reduce() -> expr& {
     while(reduced) {
         reduced = false;
 
-        // look for expressions to explore
+        // look for expressions to explode
         for (auto i = 0L; i < size(); ++i) {
             auto &n = nodes[i];
             if (n.length > 1 && n.depth > 4) {
@@ -190,21 +209,9 @@ auto expr::reduce() -> expr& {
                 auto b = *nodes[i+2].value;
                 assert(n.length == 3);
 
-                i64 left{-1};
-                for (auto j = i-1; j >= 0; --j) {
-                    if (nodes[j].value) {
-                        left = j;
-                        break;
-                    }
-                }
+                auto left = find_left(i);
+                auto right = find_right(i);
 
-                i64 right{-1};
-                for (auto j = i+n.length; j < size(); ++j) {
-                    if (nodes[j].value) {
-                        right = j; 
-                        break;
-                    }
-                }
                 ENSURE(left > -1 || right > -1);
                 auto tmp = nodes;
                 if (left >= 0) { *tmp[left].value += a; }
@@ -223,7 +230,6 @@ auto expr::reduce() -> expr& {
             for (auto i = 0L; i < size(); ++i) {
                 auto& n = nodes[i];
                 if (n.value && *n.value > 9) { // NOLINT
-                    //fmt::print("split {}\n", *n.value);
                     auto [a,b] = split(*n.value);
                     auto tmp = nodes;
                     tmp[i].value = std::nullopt;
@@ -280,7 +286,9 @@ auto day18(int argc, char** argv) -> int
     i64 magmax{0};
     for (auto i = 0; i < sz-1; ++i) {
         for (auto j = i+1; j < sz; ++j) {
-            magmax = std::max({ magmax, (numbers[i] + numbers[j]).reduce().magnitude(), (numbers[j] + numbers[i]).reduce().magnitude() });
+            auto m1 = (numbers[i] + numbers[j]).reduce().magnitude();
+            auto m2 = (numbers[j] + numbers[i]).reduce().magnitude();
+            magmax = std::max({ magmax, m1, m2 });
         }
     }
     std::cout << "part 2: " << magmax << "\n";
