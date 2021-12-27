@@ -1,4 +1,5 @@
 #include "advent.hpp"
+#include "intersect.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -15,9 +16,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#define XXH_INLINE_ALL
-#include <xxhash.h>
-
 using std::vector;
 using std::pair;
 using std::string;
@@ -25,27 +23,11 @@ using std::ifstream;
 using std::ranges::stable_sort;
 
 struct def {
-    static constexpr i64 nd{3};  // number of dimensions
+    static constexpr i64 nd{3}; // number of dimensions
     static constexpr i64 ncommon{12}; // number of beacons in common
 };
 
 using point = std::tuple<i64, i64, i64>;
-
-auto intersection_count(auto const& a, auto const& b) -> i64 {
-    i64 c{0};
-    i64 i{0};
-    i64 j{0};
-
-    while (i < a.size() && j < b.size()) {
-        auto x = a[i];
-        auto y = b[j];
-        c += static_cast<i64>(x == y);
-        i += static_cast<i64>(x <= y);
-        j += static_cast<i64>(x >= y);
-    }
-    return c;
-}
-
 
 struct scanner {
     i64 id;
@@ -78,12 +60,14 @@ struct scanner {
         return d;
     }
 
-    auto find_common_beacons(scanner const& s)
+    [[nodiscard]] auto find_common_beacons(scanner const& s) const
     {
         vector<pair<i64, i64>> map;
         for (auto i = 0L; i < distances.cols(); ++i) {
+            auto ci = sorted_distances.col(i);
             for (auto j = 0L; j < s.distances.cols(); ++j) {
-                auto count = intersection_count(sorted_distances.col(i), s.sorted_distances.col(j));
+                auto cj = s.sorted_distances.col(j);
+                auto count = detail::count_intersect(ci.data(), ci.size(), cj.data(), cj.size());
                 if(count == def::ncommon) {
                     vector<i64> chosen(s.distances.cols(), 0);
                     for (auto k = 0L; k < distances.cols(); ++k) {

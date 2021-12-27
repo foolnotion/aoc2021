@@ -1,3 +1,6 @@
+#ifndef BITCODE_HPP
+#define BITCODE_HPP
+
 #include "advent.hpp"
 
 #include <numeric>
@@ -128,3 +131,5 @@ struct bitcode {
 
     std::string code;
 };
+
+#endif
