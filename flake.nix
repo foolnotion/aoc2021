@@ -29,6 +29,7 @@
                 fmt
                 gdb
                 hyperfine
+                hotspot
                 jemalloc
                 linuxPackages.perf
                 microsoft_gsl

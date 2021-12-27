@@ -56,6 +56,7 @@ add_library(
     source/day16.cpp
     source/day17.cpp
     source/day18.cpp
+    source/day19.cpp
 )
 
 target_include_directories(
@@ -67,7 +68,7 @@ target_include_directories(
 
 target_compile_features(aoc2021_lib PUBLIC cxx_std_20)
 
-target_compile_options(aoc2021_lib PUBLIC "$<$<CONFIG:Release>:-O3;-march=x86-64;-mavx2;-mfma>")
+target_compile_options(aoc2021_lib PUBLIC "$<$<CONFIG:Release>:-O3;-g;-march=x86-64;-mavx2;-mfma>")
 
 # ---- Declare executable ----
 
