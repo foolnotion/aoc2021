@@ -25,15 +25,15 @@ endif()
 
 # ---- Find deps ----
 find_package(Eigen3 REQUIRED)
-find_package(FastFloat REQUIRED)
-find_package(Microsoft.GSL CONFIG REQUIRED)
-find_package(cpp-sort REQUIRED)
+#find_package(FastFloat REQUIRED)
+#find_package(Microsoft.GSL CONFIG REQUIRED)
+#find_package(cpp-sort REQUIRED)
 find_package(fmt REQUIRED)
 find_package(robin_hood REQUIRED)
 find_package(scn CONFIG REQUIRED)
 include(FindPkgConfig)
 pkg_search_module(XXH libxxhash REQUIRED)
-pkg_search_module(VCL vectorclass REQUIRED)
+#pkg_search_module(VCL vectorclass REQUIRED)
 
 # ---- Declare library ----
 
@@ -84,7 +84,7 @@ set_target_properties(
 
 target_compile_features(aoc2021_aoc2021 PRIVATE cxx_std_20)
 
-target_link_libraries(aoc2021_aoc2021 PRIVATE aoc2021_lib fmt::fmt Microsoft.GSL::GSL scn::scn ${XXH_LIBRARIES} ${VCL_LIBRARIES})
+target_link_libraries(aoc2021_aoc2021 PRIVATE aoc2021_lib fmt::fmt scn::scn ${XXH_LIBRARIES})
 
 # ---- Install rules ----
 

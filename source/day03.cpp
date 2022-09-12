@@ -1,8 +1,8 @@
 #include "advent.hpp"
 
 #include <fstream>
-#include <gsl/gsl_util>
 #include <string>
+#include <bit>
 
 constexpr size_t n_bit = 12;
 constexpr size_t mask = ~(std::numeric_limits<size_t>::max() << n_bit);
@@ -29,7 +29,7 @@ auto day03(int argc, char** argv) -> int
 
         // iterate the bits in v
         while(v != 0) {
-            auto const x = __builtin_ctzl(v);
+            auto const x = std::countr_zero(v);
             ++cnt.at(x);
             v &= (v-1);
         }
@@ -65,8 +65,6 @@ auto day03(int argc, char** argv) -> int
             filter(carbon, [](auto v, auto i) { return !(v & (1UL << i)); }, std::less_equal<>{}, n_bit - i - 1);
         }
     }
-    ENSURE(oxygen.size() == 1);
-    ENSURE(carbon.size() == 1);
     fmt::print("oxygen: {}, carbon dioxide: {}, life support rating: {}\n", oxygen.front(), carbon.front(), oxygen.front() * carbon.front());
 
     return 0;

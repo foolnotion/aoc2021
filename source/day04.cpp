@@ -1,9 +1,7 @@
 #include "advent.hpp"
 
 #include <fstream>
-#include <gsl/gsl_util>
 #include <iostream>
-#include <scn/scn.h>
 #include <Eigen/Dense>
 
 
@@ -16,40 +14,37 @@ auto day04(int argc, char** argv) -> int
         return 1;
     }
 
-    std::ifstream infile(argv[1]); // NOLINT
-    std::string line;
-
-    // the first line represents the list of input numbers
-    std::getline(infile, line);
+    //std::ifstream infile(argv[1]); // NOLINT
+    //std::string line;
+    scn::owning_file file(argv[1], "r");
+    std::vector<std::string> lines;
+    (void) scn::scan_list_ex(file, lines, scn::list_separator('\n'));
+    fmt::print("lines:\n{}\n", lines);
     std::vector<int> numbers;
-    auto res = scn::scan_list(line, numbers, ',');
-    ENSURE(res);
+    auto line = lines.begin();
+    (void) scn::scan_list_ex(*line, numbers, scn::list_separator(','));
+    fmt::print("numbers: {}\n", numbers);
 
     // the remainder of the file contains the board configurations
     int rows = 0;
-    std::vector<std::vector<int>> values;
+    std::vector<int> values;
     std::vector<board> boards;
 
-    while(std::getline(infile, line)) {
-        if (line.empty()) {
-            if (rows > 0) {
-                boards.emplace_back(rows, values.front().size());
-                auto& b = boards.back();
-                for (size_t i = 0; i < values.size(); ++i) {
-                    EXPECT(values[i].size() == b.rows());
-                    b.row(gsl::narrow<Eigen::Index>(i)) = Eigen::Map<Eigen::Array<int, -1, 1>>(values[i].data(), values[i].size());
-                }
-                rows = 0;
-                values.clear();
-                //std::cout << b << "\n\n";
-            }
-            continue;
+    constexpr int nrow{5};
+    constexpr int ncol{5};
+    constexpr int bingo_size{25}; // 5 x 5
+    while(++line != lines.end()) {
+        auto ret = scn::scan_value<int>(*line);
+        if (ret.has_value()) {
+            values.push_back(ret.value());
+        } else {
+            throw std::runtime_error("could not parse value");
         }
-        std::vector<int> vec;
-        auto res = scn::scan_list(line, vec, ' ');
-        ENSURE(res);
-        values.push_back(vec);
-        ++rows;
+
+        if (values.size() == bingo_size) {
+            boards.emplace_back(Eigen::Map<Eigen::Array<int, -1, -1, Eigen::RowMajor>>(values.data(), nrow, ncol));
+            values.clear();
+        }
     }
 
     // part 1

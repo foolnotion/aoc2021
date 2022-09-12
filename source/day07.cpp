@@ -6,10 +6,10 @@
 #include <fmt/ranges.h>
 #include <fstream>
 #include <functional>
-#include <gsl/gsl_util>
 #include <iostream>
 #include <numeric>
 #include <ranges>
+#include <scn/scan/list.h>
 #include <scn/scn.h>
 #include <vector>
 
@@ -30,12 +30,11 @@ auto day07(int argc, char** argv) -> int
 
     std::getline(infile, str);
     vector<i64> pos; // positions
-    auto res = scn::scan_list(str, pos, ',');
-    ENSURE(res);
+    auto res = scn::scan_list_ex(str, pos, scn::list_separator(','));
     sort(pos);
     auto const sz = std::ssize(pos);
-    auto med = sz % 2 == 0 ? pos[sz / 2 - 1] : gsl::narrow<i64>(std::midpoint(pos[sz / 2 - 1], pos[sz / 2]));
-    auto mean = std::accumulate(pos.begin(), pos.end(), double { 0 }) / gsl::narrow<double>(sz);
+    auto med = sz % 2 == 0 ? pos[sz / 2 - 1] : static_cast<i64>(std::midpoint(pos[sz / 2 - 1], pos[sz / 2]));
+    auto mean = std::accumulate(pos.begin(), pos.end(), double { 0 }) / static_cast<double>(sz);
     fmt::print("mean: {}, median: {}\n", mean, med);
 
     // part 1
@@ -47,7 +46,7 @@ auto day07(int argc, char** argv) -> int
 
     i64 min_cost = std::numeric_limits<i64>::max();
     i64 min_pos = 0;
-    for (auto i : iota(gsl::narrow<i64>(std::floor(mean-1)), gsl::narrow<i64>(std::ceil(mean+1)))) {
+    for (auto i : iota(static_cast<i64>(std::floor(mean-1)), static_cast<i64>(std::ceil(mean+1)))) {
         auto costs2 = pos | transform([&](auto p) { return sum(std::abs(i - p)); });
         auto cost = std::accumulate(costs2.begin(), costs2.end(), i64 { 0 });
         if (min_cost > cost) {

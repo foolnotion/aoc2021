@@ -40,7 +40,6 @@ auto day14(int argc, char** argv) -> int
         if (line.empty()) { continue; }
         tokens.clear();
         util::tokenize(line, ' ', tokens);
-        ENSURE(!tokens[0].empty());
         rules[tokens[0]] = tokens[2][0];
     }
 

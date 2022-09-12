@@ -3,7 +3,6 @@
 #include <bitset>
 #include <fmt/ranges.h>
 #include <fstream>
-#include <gsl/gsl_util>
 #include <iostream>
 #include <numeric>
 #include <ranges>
@@ -61,13 +60,12 @@ auto day08(int argc, char** argv) -> int
         tokens.clear();
         util::tokenize(line, '|', tokens);
         tmp.clear();
-        scn::scan_list(tokens[0], tmp, ' ');
+        (void) scn::scan_list(tokens[0], tmp);
         signals.emplace_back(tmp.begin(), tmp.end());
         tmp.clear();
-        scn::scan_list(tokens[1], tmp, ' ');
+        (void) scn::scan_list(tokens[1], tmp);
         outputs.emplace_back(tmp.begin(), tmp.end());
     }
-    ENSURE(signals.size() == outputs.size()); 
 
     // part1
     auto is_uniq = [](auto n) { return n == 2 || n == 3 || n == 4 || n == 7; }; // NOLINT
@@ -135,7 +133,6 @@ auto day08(int argc, char** argv) -> int
             return { };
         };
         auto res = search(0, search);
-        ENSURE(res);
         return res;
     };
 

@@ -4,7 +4,6 @@
 #include <fmt/color.h>
 #include <fmt/ranges.h>
 #include <fstream>
-#include <gsl/gsl_util>
 #include <iostream>
 #include <numeric>
 #include <queue>
@@ -47,10 +46,10 @@ auto day09(int argc, char** argv) -> int
 
     i64 row { 0 };
     while (std::getline(infile, line)) { // NOLINT
-        i64 v { 0 };
+        //i64 v { 0 };
         for (auto i : iota(0, std::ssize(line))) {
-            scn::scan(std::string { line[i] }, "{}", v);
-            map(row, i) = v;
+            auto ret = scn::scan_value<i64>(std::string{line[i]});
+            map(row, i) = ret.value();
         }
         ++row;
     }

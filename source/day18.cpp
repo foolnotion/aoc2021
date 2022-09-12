@@ -12,7 +12,6 @@
 #include <tuple>
 #include <variant>
 #include <vector>
-#include <gsl/span>
 
 using std::ifstream;
 using std::ostream;
@@ -22,7 +21,6 @@ using std::vector;
 
 auto split(i64 n) -> std::pair<i64, i64>
 {
-    ENSURE(n > 9);
     auto a = static_cast<i64>(std::floor(static_cast<double>(n) / 2.0));
     auto b = static_cast<i64>(std::ceil(static_cast<double>(n) / 2.0));
     return {a, b};
@@ -86,12 +84,12 @@ struct expr {
         update();
     }
 
-    auto subspan(i64 i) -> gsl::span<node> {
-        return gsl::span<node>(nodes.data() + i, nodes[i].length);
+    auto subspan(i64 i) -> std::span<node> {
+        return std::span<node>(nodes.data() + i, nodes[i].length);
     }
 
-    auto subspan(i64 i) const -> gsl::span<node const> {
-        return gsl::span<node const>(nodes.data() + i, nodes[i].length);
+    auto subspan(i64 i) const -> std::span<node const> {
+        return std::span<node const>(nodes.data() + i, nodes[i].length);
     }
 
     auto size() const -> i64 { return std::ssize(nodes); }
@@ -168,11 +166,11 @@ struct expr {
 struct infix {
     explicit infix(vector<node> const& n) : nodes(n), idx(0) { }
 
-    explicit infix(gsl::span<node const> n) : nodes(n), idx(0) { }
+    explicit infix(std::span<node const> n) : nodes(n), idx(0) { }
 
     explicit infix(expr const& t) : nodes(t.nodes), idx(0) { }
 
-    gsl::span<node const> nodes;
+    std::span<node const> nodes;
     i64 idx;
 
     friend auto operator<<(ostream& os, infix&& /*infx*/) -> ostream&;
@@ -212,7 +210,6 @@ auto expr::reduce() -> expr& {
                 auto left = find_left(i);
                 auto right = find_right(i);
 
-                ENSURE(left > -1 || right > -1);
                 if (left >= 0) { *nodes[left].value += a; }
                 if (right >= 0) { *nodes[right].value += b; }
                 nodes[i] = node(0);

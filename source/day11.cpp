@@ -3,7 +3,6 @@
 #include <fmt/color.h>
 #include <fmt/ranges.h>
 #include <fstream>
-#include <gsl/gsl_util>
 #include <iostream>
 #include <tuple>
 #include <ranges>

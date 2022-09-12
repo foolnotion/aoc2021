@@ -26,25 +26,28 @@ struct bitcode {
         char c{'0'};
         do {
             c = sv[0];
-            scn::scan(sv.substr(1, group_size-1), "{:b2}", v);
+            auto s = sv.substr(1, group_size-1);
+            (void) scn::scan(s, "{:b2}", v);
             fmt::format_to(buf, "{:04b}", v);
             parsed_bits += group_size;
             sv.remove_prefix(group_size);
         } while (c != '0');
 
-        scn::scan(fmt::to_string(buf), "{:b2}", v);
+        (void) scn::scan(fmt::to_string(buf), "{:b2}", v);
         return { v, parsed_bits };
     }
 
     auto parse_op(std::string_view sv, u64 opcode) -> res_t {
-        u64 id{0}; scn::scan(sv.substr(0, 1), "{:b2}", id);
+        auto s = sv.substr(0, 1);
+        u64 id{0}; (void)scn::scan(s, "{:b2}", id);
         sv.remove_prefix(1);
         u64 parsed_bits{1};
         std::vector<i64> values;
         constexpr auto field_bits_id0 = 15UL;
         constexpr auto field_bits_id1 = 11UL;
         const auto field_bits = id ? field_bits_id1 : field_bits_id0;
-        u64 n{0}; scn::scan(sv.substr(0, field_bits), "{:b2}", n);
+        s = sv.substr(0, field_bits);
+        u64 n{0}; (void)scn::scan(s, "{:b2}", n);
         parsed_bits += field_bits;
         sv.remove_prefix(field_bits);
         u64 bits{0};
@@ -76,17 +79,14 @@ struct bitcode {
                 break;
             }
             case packet_type::gt: {
-                ENSURE(values.size() == 2);
                 value = values[0] > values[1] ? 1 : 0;
                 break;
             }
             case packet_type::lt: {
-                ENSURE(values.size() == 2);
                 value = values[0] < values[1] ? 1 : 0;
                 break;
             }
             case packet_type::eq: {
-                ENSURE(values.size() == 2);
                 value = values[0] == values[1] ? 1 : 0;
                 break;
             }
@@ -98,8 +98,11 @@ struct bitcode {
     }
 
     auto parse(std::string_view sv) -> res_t {
-        u64 version{0}; scn::scan(sv.substr(0, 3), "{:b2}", version);
-        u64 type{0}; scn::scan(sv.substr(3, 3), "{:b2}", type);
+        auto s = sv.substr(0, 3);
+        u64 version{0}; (void) scn::scan(s, "{:b2}", version);
+        s = sv.substr(3, 3);
+        u64 type{0}; (void) scn::scan(s, "{:b2}", type);
+        //auto version = scn::scan_value<u64>("111", "{:b2}");
         
         version_sum += version;
         sv.remove_prefix(header_size);
@@ -123,7 +126,7 @@ struct bitcode {
         fmt::memory_buffer buf;
         for (char c : s) {
             std::size_t v{0};
-            scn::scan(std::string{c}, "{:x}", v);
+            (void) scn::scan(std::string{c}, "{:x}", v);
             fmt::format_to(buf, "{:04b}", v);
         }
         code = fmt::to_string(buf);

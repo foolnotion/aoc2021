@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include <numeric>
+#include <scn/scan/list.h>
 #include <vector>
 #include <tuple>
 #include <ranges>
@@ -140,7 +141,7 @@ auto read_input(int argc, char** argv) {
             continue;
         }
         values.emplace_back();
-        scn::scan_list(line, values.back(), ',');
+        (void)scn::scan_list_ex(line, values.back(), scn::list_separator(','));
     }
     scanners[0].position = {0, 0, 0};
 

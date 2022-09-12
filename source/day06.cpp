@@ -4,6 +4,7 @@
 #include <numeric>
 #include <fstream>
 #include <ranges>
+#include <scn/scan/list.h>
 #include <scn/scn.h>
 #include <vector>
 
@@ -22,18 +23,17 @@ auto day06(int argc, char** argv) -> int
 
     std::getline(infile, str);
     std::vector<int> fish;
-    auto res = scn::scan_list(str, fish, ',');
-    ENSURE(res);
+    auto res = scn::scan_list_ex(str, fish, scn::list_separator(','));
 
     int time{};
-    scn::scan(std::string(argv[2]), "{}", time);
+    (void) scn::scan(std::string(argv[2]), "{}", time);
 
     std::vector<uint64_t> ages(age_new+1, 0);
     for(auto f : fish) {
         ++ages[f];
     }
 
-    for (auto t : std::ranges::iota_view{0, time}) {
+    for (int i = 0; i < time; ++i) {
         std::ranges::rotate(ages, ages.begin() + 1);
         ages[age_old] += ages[age_new];
     }

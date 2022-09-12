@@ -3,27 +3,10 @@
 
 #include <fmt/color.h>
 #include <fmt/format.h>
-#include <gsl/gsl_assert>
+#include <fmt/ranges.h>
+#include <scn/scn.h>
 #include <string>
 #include <vector>
-
-#define EXPECT(cond)                                                       \
-    if (GSL_UNLIKELY(!(cond))) {                                           \
-        fmt::print("Precondition {} failed at {}: {}\n",                   \
-            fmt::format(fmt::fg(fmt::terminal_color::green), "{}", #cond), \
-            __FILE__,                                                      \
-            __LINE__);                                                     \
-        gsl::details::terminate();                                         \
-    }
-
-#define ENSURE(cond)                                                       \
-    if (GSL_UNLIKELY(!(cond))) {                                           \
-        fmt::print("Precondition {} failed at {}: {}\n",                   \
-            fmt::format(fmt::fg(fmt::terminal_color::green), "{}", #cond), \
-            __FILE__,                                                      \
-            __LINE__);                                                     \
-        gsl::details::terminate();                                         \
-    }
 
 using i32 = int32_t;
 using i64 = int64_t;

@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <fstream>
-#include <gsl/gsl_util>
 #include <iostream>
 #include <scn/scn.h>
 #include <Eigen/Dense>
@@ -21,9 +20,9 @@ auto day05(int argc, char** argv) -> int
         util::tokenize(str, ' ', tokens);
         int x = 0;
         int y = 0;
-        scn::scan(tokens[0], "{},{}", x, y);
+        (void) scn::scan(tokens[0], "{},{}", x, y);
         point p1{x, y};
-        scn::scan(tokens[2], "{},{}", x, y);
+        (void) scn::scan(tokens[2], "{},{}", x, y);
         point p2{x, y};
         lines.emplace_back(p1, p2);
     }

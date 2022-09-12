@@ -9,10 +9,9 @@ auto day01(int argc, char** argv) -> int {
         return 1;
     }
 
-    auto *f = std::fopen(argv[1], "re");
-    scn::file file{f};
+    scn::owning_file file(argv[1], "r");
     std::vector<int> values;
-    auto result = scn::scan_list(file, values, '\n');
+    auto result = scn::scan_list_ex(file, values, scn::list_separator('\n'));
     size_t count1{0UL};
     size_t count2{0UL};
     for (size_t i = 1; i < values.size(); ++i) {

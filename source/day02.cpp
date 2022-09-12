@@ -32,9 +32,7 @@ auto day02(int argc, char** argv) -> int {
     while (std::getline(infile, line)) {
         util::tokenize(line, ' ', tokens);
         auto res = scn::scan_value<int>(tokens[1]);
-        ENSURE(res);
         auto it = dex.find(tokens[0]);
-        ENSURE(it != dex.end());
         pairs.emplace_back(it->second, res.value());
     }
 

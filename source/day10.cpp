@@ -4,7 +4,6 @@
 #include <fmt/color.h>
 #include <fmt/ranges.h>
 #include <fstream>
-#include <gsl/gsl_util>
 #include <iostream>
 #include <numeric>
 #include <ranges>
