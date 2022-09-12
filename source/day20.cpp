@@ -23,7 +23,6 @@ auto day20(int argc, char** argv) -> int
     }
 
     std::ifstream ff(argv[1]);
-
     std::string line;
     std::getline(ff, line);
     std::bitset<512> alg;
@@ -35,7 +34,6 @@ auto day20(int argc, char** argv) -> int
 
     using point = std::array<int, 2>;
     using image = robin_hood::unordered_map<point, bool>;
-
     // read input
     image input;
     {
@@ -48,62 +46,40 @@ auto day20(int argc, char** argv) -> int
         }
     }
 
-    constexpr int nb { 9 }; // 3x3 grid
-    auto decode = [](image const& im, point p, bool g = false /*backgound*/) {
+    constexpr int nb {9}; // 3x3 grid
+    auto decode = [](image const& im, point p, bool g = false /*background*/) {
         auto [x, y] = p;
         int k = nb;
         std::bitset<nb> b;
         for (auto i = x - 1; i <= x + 1; ++i) {
             for (auto j = y - 1; j <= y + 1; ++j) {
-                --k;
-                if (auto it = im.find({ i, j }); it != im.end()) {
-                    b[k] = it->second;
-                } else {
-                    b[k] = g;
-                }
+                auto it = im.find({i, j});
+                b[--k] = it == im.end() ? g : it->second;
             }
         }
         return b.to_ulong();
     };
 
     auto getlimits = [](image const& im) -> std::tuple<int, int, int, int> {
-        int x1 { 0 };
-        int x2 { 0 };
-        int y1 { 0 };
-        int y2 { 0 };
-
-        // get new limits
-        for (auto const& [p, v] : im) {
-            auto [x, y] = p;
-            x1 = std::min(x1, x);
-            x2 = std::max(x2, x);
-            y1 = std::min(y1, y);
-            y2 = std::max(y2, y);
-        }
-
-        return { x1, x2, y1, y2 };
+        auto [xmin, xmax] = std::ranges::minmax_element(im, std::less{}, [](auto const& t) { return t.first[0]; });
+        auto [ymin, ymax] = std::ranges::minmax_element(im, std::less{}, [](auto const& t) { return t.first[1]; });
+        return {xmin->first[0], xmax->first[0], ymin->first[1], ymax->first[1]};
     };
 
     auto enhance = [&](image im, int steps) {
         image out;
         bool lit { false };
         auto [xmin, xmax, ymin, ymax] = getlimits(im);
-        for (auto s = 0; s < steps; ++s) {
-            for (auto x = xmin - 1; x <= xmax + 1; ++x) {
-                for (auto y = ymin - 1; y <= ymax + 1; ++y) {
+        for (auto s = 1; s <= steps; ++s) {
+            for (auto x = xmin - s; x <= xmax + s; ++x) {
+                for (auto y = ymin - s; y <= ymax + s; ++y) {
                     auto v = decode(im, { x, y }, lit);
                     out[{ x, y }] = alg[v];
                 }
             }
-            if (alg[0]) {
-                lit = !lit;
-            }
+            if (alg[0]) { lit = !lit; }
             im.swap(out);
             out.clear();
-            --xmin;
-            ++xmax;
-            --ymin;
-            ++ymax;
         }
         auto count = std::ranges::count_if(im, [](auto const& t) { return t.second; });
         return count;
