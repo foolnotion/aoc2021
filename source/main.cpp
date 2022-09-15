@@ -2,5 +2,5 @@
 
 auto main(int argc, char** argv) -> int
 {
-  return day20(argc, argv);
+  return day21(argc, argv);
 }
