@@ -103,7 +103,8 @@ auto day21(int argc, char** argv) -> int
             return std::array { u64 { g.turn }, u64 { !g.turn } };
         }
         // check if this game is cached
-        if (auto it = map.find(g.hash()); it != map.end()) {
+        auto hash = g.hash();
+        if (auto it = map.find(hash); it != map.end()) {
             return it->second;
         }
         // else, recurse deeper and sum up the win counts
@@ -115,7 +116,7 @@ auto day21(int argc, char** argv) -> int
             auto [a, b] = simulate(h, simulate);
             wins = std::array { wins[0]+ f * a, wins[1] + f * b };
         }
-        map[g.hash()] = wins;
+        map[hash] = wins;
         return wins;
     };
     auto [a, b] = simulate(part_two, simulate);
