@@ -1,9 +1,6 @@
 #include "advent.hpp"
-#include <deque>
-#include <numeric>
 #include <ranges>
 #include <robin_hood.h>
-#include <tuple>
 #include <xxhash.h>
 
 struct dice {
@@ -110,19 +107,19 @@ auto day21(int argc, char** argv) -> int
             return it->second;
         }
         // else, recurse deeper and sum up the win counts
-        std::array w { 0UL, 0UL };
+        std::array wins { 0UL, 0UL };
         for (auto v = 3; v <= 9; ++v) {
             auto f = ways[v - 3];
             auto h = g;
             h.update(v);
             auto [a, b] = simulate(h, simulate);
-            w = std::array { w[0]+ f * a, w[1] + f * b };
+            wins = std::array { wins[0]+ f * a, wins[1] + f * b };
         }
-        map[g.hash()] = w;
-        return w;
+        map[g.hash()] = wins;
+        return wins;
     };
-    auto wins = simulate(part_two, simulate);
-    fmt::print("part 2: {}\n", *std::ranges::max_element(wins));
+    auto [a, b] = simulate(part_two, simulate);
+    fmt::print("part 2: {}\n", std::max(a,b));
 
     return 0;
 }
