@@ -3,18 +3,17 @@
 #include <bitset>
 #include <fstream>
 #include <iostream>
+#include <ranges>
 #include <robin_hood.h>
 #include <xxhash.h>
 
-namespace std {
-template <class T, size_t N>
-struct hash<std::array<T, N>> {
-    auto operator()(std::array<T, N> const& arr) const noexcept -> std::size_t
+template <std::ranges::random_access_range R, typename T = typename std::remove_cvref_t<R>::value_type>
+struct hash {
+    auto operator()(R const& r) const noexcept -> std::size_t
     {
-        return XXH3_64bits(arr.data(), N * sizeof(T) / sizeof(uint8_t));
+        return XXH3_64bits(r.data(), r.size() * sizeof(T));
     }
 };
-} // namespace std
 
 auto day20(int argc, char** argv) -> int
 {
@@ -33,7 +32,7 @@ auto day20(int argc, char** argv) -> int
     std::getline(ff, line); // skip an empty line
 
     using point = std::array<int, 2>;
-    using image = robin_hood::unordered_map<point, bool>;
+    using image = robin_hood::unordered_map<point, bool, hash<point>>;
     // read input
     image input;
     {
