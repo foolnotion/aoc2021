@@ -24,16 +24,18 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()
 
 # ---- Find deps ----
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
 #find_package(FastFloat REQUIRED)
 #find_package(Microsoft.GSL CONFIG REQUIRED)
 #find_package(cpp-sort REQUIRED)
-find_package(fmt REQUIRED)
-find_package(robin_hood REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(robin_hood CONFIG REQUIRED)
 find_package(scn CONFIG REQUIRED)
-include(FindPkgConfig)
-pkg_search_module(XXH libxxhash REQUIRED)
+find_package(cpp-lazy CONFIG REQUIRED)
+find_package(xxHash CONFIG REQUIRED)
 #pkg_search_module(VCL vectorclass REQUIRED)
+get_target_property(LZ_INCLUDE_DIR cpp-lazy::cpp-lazy INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "cpp-lazy include: ${LZ_INCLUDE_DIR}")
 
 # ---- Declare library ----
 
@@ -61,6 +63,7 @@ add_library(
     source/day20.cpp
     source/day21.cpp
     source/day22.cpp
+    source/day23.cpp
 )
 
 target_include_directories(
@@ -71,11 +74,9 @@ target_include_directories(
 )
 
 target_compile_features(aoc2021_lib PUBLIC cxx_std_20)
-
-target_compile_options(aoc2021_lib PUBLIC "$<$<CONFIG:Release>:-O3;-g;-march=x86-64;-mavx2;-mfma>")
+target_link_libraries(aoc2021_lib PUBLIC cpp-lazy::cpp-lazy fmt::fmt scn::scn xxHash::xxhash)
 
 # ---- Declare executable ----
-
 add_executable(aoc2021_aoc2021 source/main.cpp)
 add_executable(aoc2021::aoc2021 ALIAS aoc2021_aoc2021)
 
@@ -86,8 +87,7 @@ set_target_properties(
 )
 
 target_compile_features(aoc2021_aoc2021 PRIVATE cxx_std_20)
-
-target_link_libraries(aoc2021_aoc2021 PRIVATE aoc2021_lib fmt::fmt scn::scn ${XXH_LIBRARIES})
+target_link_libraries(aoc2021_aoc2021 PRIVATE aoc2021_lib)
 
 # ---- Install rules ----
 
