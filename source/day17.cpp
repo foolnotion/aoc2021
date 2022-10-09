@@ -21,7 +21,7 @@ auto day17(int argc, char** argv) -> int
     auto y1 = 0L;
     auto y2 = 0L;
 
-    scn::scan(line, "target area: x={}..{}, y={}..{}", x1, x2, y1, y2);
+    (void) scn::scan(line, "target area: x={}..{}, y={}..{}", x1, x2, y1, y2);
 
     i64 part1 = 0;
     i64 part2 = 0;

@@ -31,7 +31,7 @@ auto day13(int argc, char** argv) -> int
     vector<pair<i64, i64>> points;
     while (std::getline(infile, line)) { // NOLINT
         if (line.empty()) { break; }
-        scn::scan(std::string(line), "{},{}", y, x);
+        (void) scn::scan(std::string(line), "{},{}", y, x);
         points.emplace_back(x, y);
     }
     for (auto [a, b] : points) {

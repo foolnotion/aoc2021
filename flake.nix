@@ -23,6 +23,7 @@
             nativeBuildInputs = with pkgs; [ bear cmake clang_14 clang-tools cppcheck ];
             buildInputs = with pkgs; [
                 # python environment for bindings and scripting
+                cpp-lazy
                 doctest
                 eigen
                 fmt
@@ -35,7 +36,13 @@
                 xxHash
                 scnlib
                 robin-hood-hashing
+                seer
+                hotspot
               ];
+
+              shellHook = ''
+                alias bb="cmake --build build -j"
+              '';
           };
         }
       );

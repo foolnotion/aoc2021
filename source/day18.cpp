@@ -60,7 +60,7 @@ struct parser {
             u64 sz{1};
             while (std::isdigit(str[pos+sz])) { ++sz; }
             i64 v{0};
-            scn::scan(str.substr(pos, sz), "{}", v);
+            (void) scn::scan(str.substr(pos, sz), "{}", v);
             n.value = v;
             pos += sz;
             nodes.push_back(n);
