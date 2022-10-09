@@ -27,7 +27,7 @@ auto day23(int argc, char **argv) -> int {
     while(std::getline(f, line)) {
         lines.emplace_back(line);
     }
-    Eigen::Array<char, -1, -1, Eigen::RowMajor> arr(lines.size()-2, lines.front().size()-2);
+    Eigen::Array<char, -1, -1> arr(lines.size()-2, lines.front().size()-2);
     for(auto i = 1; i < std::ssize(lines)-1; ++i) {
         arr.row(i-1) = Eigen::Map<Eigen::Array<char, -1, 1>>(lines[i].data() + 1, lines[i].size() - 1);
     }
@@ -66,7 +66,7 @@ auto day23(int argc, char **argv) -> int {
             auto room = arr.col(j).segment(1, roomsize);
             auto can_enter = (room == c || room == '.').all();
             if (can_enter) {
-                auto it = std::ranges::partition_point(room.begin(), room.end(), empty);
+                auto it = std::ranges::partition_point(room, empty);
                 auto r = std::distance(room.begin(), it);
                 auto d = (r + abs(i - j)) * podcost[c - 'A'];
 
