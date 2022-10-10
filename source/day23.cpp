@@ -64,17 +64,15 @@ auto day23(int argc, char **argv) -> int {
             if (i > j && (hall.segment(j, i-j-1) != '.').any()) { continue; } // path blocked
 
             auto room = arr.col(j).segment(1, roomsize);
-            auto can_enter = (room == c || room == '.').all();
-            if (can_enter) {
+            if ((room == c || room == '.').all()) {
                 auto it = std::ranges::partition_point(room, empty);
                 auto r = std::distance(room.begin(), it);
                 auto d = (r + abs(i - j)) * podcost[c - 'A'];
+                if (cost + d >= mincost) { continue; }
 
-                if (cost + d < mincost) {
-                    std::swap(hall(i), arr(r, j));
-                    search(search, cost + d);
-                    std::swap(hall(i), arr(r, j));
-                }
+                std::swap(hall(i), arr(r, j));
+                search(search, cost + d);
+                std::swap(hall(i), arr(r, j));
             }
         }
 
@@ -93,12 +91,11 @@ auto day23(int argc, char **argv) -> int {
                 if (hall(j) != '.') { continue; } // this position is occupied by an amphipod
                 if ((hall.segment(std::min(i, j), abs(i-j)) != '.').any()) { continue; } // path blocked
                 auto d = (r + abs(i - j)) * podcost[c - 'A'];
+                if (cost + d >= mincost) { continue; }
 
-                if (cost + d < mincost) {
-                    std::swap(hall(j), arr(r, i));
-                    search(search, cost + d);
-                    std::swap(hall(j), arr(r, i));
-                }
+                std::swap(hall(j), arr(r, i));
+                search(search, cost + d);
+                std::swap(hall(j), arr(r, i));
             }
         }
     };
