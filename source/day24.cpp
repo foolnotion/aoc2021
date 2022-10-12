@@ -2,6 +2,7 @@
 
 #include <array>
 #include <deque>
+#include <math.h>
 #include <numeric>
 
 #include <fmt/ranges.h>
@@ -51,11 +52,10 @@ auto day24(int argc, char** argv) -> int
     std::array<i64, ndigits> digits;
     std::iota(digits.rbegin(), digits.rend(), 1);
 
-    bool found{false};
-    auto check = [&](auto&& check, i64 z, i64 n, i64 d) { // NOLINT
+    auto check = [&](auto&& check, i64 z, i64 n, i64 d) -> std::optional<i64> { // NOLINT
         std::array arr { z, d };
         auto h = XXH_INLINE_XXH3_64bits(arr.data(), arr.size() * sizeof(i64));
-        if (auto [it, ok] = seen.insert(h); !ok) { return false; }
+        if (auto [it, ok] = seen.insert(h); !ok) { return {}; }
         auto p = params.subspan(d * np, np);
         auto a = p[0];
         auto b = p[1];
@@ -66,24 +66,24 @@ auto day24(int argc, char** argv) -> int
             auto x = s != z0 % m + b;
             z = z0 / a * ((m-1) * x + 1) + (s+c) * x;
 
-            if (d == dmax && z == 0) {
-                fmt::print("{}\n", n + s);
-                return true;
-            }
-            if (d < dmax && !found) {
-                found = check(check, z, (n + s) * 10, d + 1); // NOLINT
+            if (d == dmax && z == 0) { return { n + s }; }
+
+            if (d < dmax) {
+                auto found = check(check, z, (n + s) * 10, d + 1); // NOLINT
+                if (found) { return found; }
             }
         }
-        return false;
+        return { };
     };
     // part 1
-    check(check, 0, 0, 0);
+    auto p1 = check(check, 0, 0, 0);
+    if (p1) { fmt::print("{}\n", p1.value()); }
 
     // part 2
     seen.clear();
-    found = false;
     std::iota(digits.begin(), digits.end(), 1);
-    check(check, 0, 0, 0);
+    auto p2 = check(check, 0, 0, 0);
+    if (p2) { fmt::print("{}\n", p2.value()); }
 
     return 0;
 }
