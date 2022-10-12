@@ -28,16 +28,17 @@
                 eigen
                 fmt
                 gdb
+                hotspot
                 hyperfine
                 linuxPackages.perf
+                mdspan
                 openlibm
                 pkg-config
+                robin-hood-hashing
+                scnlib
+                seer
                 valgrind
                 xxHash
-                scnlib
-                robin-hood-hashing
-                seer
-                hotspot
               ];
 
               shellHook = ''

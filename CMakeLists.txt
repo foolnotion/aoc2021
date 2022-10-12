@@ -33,6 +33,7 @@ find_package(robin_hood CONFIG REQUIRED)
 find_package(scn CONFIG REQUIRED)
 find_package(cpp-lazy CONFIG REQUIRED)
 find_package(xxHash CONFIG REQUIRED)
+find_package(mdspan CONFIG REQUIRED)
 #pkg_search_module(VCL vectorclass REQUIRED)
 get_target_property(LZ_INCLUDE_DIR cpp-lazy::cpp-lazy INTERFACE_INCLUDE_DIRECTORIES)
 message(STATUS "cpp-lazy include: ${LZ_INCLUDE_DIR}")
@@ -64,6 +65,7 @@ add_library(
     source/day21.cpp
     source/day22.cpp
     source/day23.cpp
+    source/day24.cpp
 )
 
 target_include_directories(
