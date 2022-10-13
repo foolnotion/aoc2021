@@ -2,7 +2,6 @@
 
 #include <array>
 #include <deque>
-#include <math.h>
 #include <numeric>
 
 #include <fmt/ranges.h>
@@ -20,7 +19,6 @@ auto hash(Ts... ts)
 
 auto day24(int argc, char** argv) -> int
 {
-
     constexpr i64 np { 3 }; // number of parameters of the monad function
     constexpr i64 nv { 14 }; // number of parameter values
 
@@ -47,8 +45,6 @@ auto day24(int argc, char** argv) -> int
     robin_hood::unordered_set<u64> seen;
 
     std::array<i64, ndigits> digits;
-    std::iota(digits.rbegin(), digits.rend(), 1);
-
     auto check = [&](auto&& check, i64 z, i64 n, i64 d) -> std::optional<i64> { // NOLINT
         if (auto [it, ok] = seen.insert(hash(z, d)); !ok) { return {}; }
         auto [a, b, c] = params[d];
@@ -56,10 +52,10 @@ auto day24(int argc, char** argv) -> int
         auto z0 = z;
         for (auto s : digits) {
             auto x = s != z0 % m + b;
+            // the only way z can decrease towards zero is when a=26 and x=0
+            if (a == m && x != 0) { continue; }
             z = z0 / a * ((m-1) * x + 1) + (s+c) * x;
-
             if (d == dmax && z == 0) { return { n + s }; }
-
             if (d < dmax) {
                 auto found = check(check, z, (n + s) * 10, d + 1);
                 if (found) { return found; }
@@ -67,7 +63,9 @@ auto day24(int argc, char** argv) -> int
         }
         return { };
     };
+
     // part 1
+    std::iota(digits.rbegin(), digits.rend(), 1);
     auto p1 = check(check, 0, 0, 0);
     if (p1) { fmt::print("{}\n", p1.value()); }
 
