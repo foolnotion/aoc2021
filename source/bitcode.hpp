@@ -27,19 +27,19 @@ struct bitcode {
         do {
             c = sv[0];
             auto s = sv.substr(1, group_size-1);
-            (void) scn::scan(s, "{:b2}", v);
+            (void) scn::scan(s, "{:b}", v);
             fmt::format_to(buf, "{:04b}", v);
             parsed_bits += group_size;
             sv.remove_prefix(group_size);
         } while (c != '0');
 
-        (void) scn::scan(fmt::to_string(buf), "{:b2}", v);
+        (void) scn::scan(fmt::to_string(buf), "{:b}", v);
         return { v, parsed_bits };
     }
 
     auto parse_op(std::string_view sv, u64 opcode) -> res_t {
         auto s = sv.substr(0, 1);
-        u64 id{0}; (void)scn::scan(s, "{:b2}", id);
+        u64 id{0}; (void)scn::scan(s, "{:b}", id);
         sv.remove_prefix(1);
         u64 parsed_bits{1};
         std::vector<i64> values;
@@ -47,7 +47,7 @@ struct bitcode {
         constexpr auto field_bits_id1 = 11UL;
         const auto field_bits = id ? field_bits_id1 : field_bits_id0;
         s = sv.substr(0, field_bits);
-        u64 n{0}; (void)scn::scan(s, "{:b2}", n);
+        u64 n{0}; (void)scn::scan(s, "{:b}", n);
         parsed_bits += field_bits;
         sv.remove_prefix(field_bits);
         u64 bits{0};
@@ -99,10 +99,10 @@ struct bitcode {
 
     auto parse(std::string_view sv) -> res_t {
         auto s = sv.substr(0, 3);
-        u64 version{0}; (void) scn::scan(s, "{:b2}", version);
+        u64 version{0}; (void) scn::scan(s, "{:b}", version);
         s = sv.substr(3, 3);
-        u64 type{0}; (void) scn::scan(s, "{:b2}", type);
-        //auto version = scn::scan_value<u64>("111", "{:b2}");
+        u64 type{0}; (void) scn::scan(s, "{:b}", type);
+        //auto version = scn::scan_value<u64>("111", "{:b}");
         
         version_sum += version;
         sv.remove_prefix(header_size);
