@@ -2,14 +2,10 @@
 #include <fstream>
 #include <vector>
 #define XXH_INLINE_ALL
-#include <xxhash.h>
+#include <xxh3.h>
 #include <robin_hood.h>
 #include <Eigen/Core>
 using std::abs;
-
-auto hash(auto const& arr) {
-    return XXH_INLINE_XXH3_64bits(arr.data(), arr.size() * sizeof(char));
-}
 
 constexpr std::array hallidx { 0, 1, 3, 5, 7, 9, 10 };
 constexpr std::array roomidx { 2, 4, 6, 8 };
@@ -43,8 +39,9 @@ auto day23(int argc, char **argv) -> int {
     auto hall = arr.row(0);
     auto empty = [](char c) { return c == '.'; };
 
+    std::array idx = roomidx;
     auto search = [&](auto&& search, int cost) {
-        auto h = hash(arr);
+        auto h = XXH_INLINE_XXH3_64bits(arr.data(), arr.size());
         if (auto [it, ok] = state.insert({h, cost}); !ok) {
             if (cost > it->second) { return; }
             it->second = cost;
@@ -59,7 +56,7 @@ auto day23(int argc, char **argv) -> int {
         for (auto i : hallidx) {
             auto c = hall(i);
             if (c == '.') { continue; }
-            auto j = roomidx[c - 'A'];
+            auto j = roomidx[c-'A'];
             if (i < j && (hall.segment(i+1, j-i) != '.').any()) { continue; } // path blocked
             if (i > j && (hall.segment(j, i-j-1) != '.').any()) { continue; } // path blocked
 
@@ -77,7 +74,12 @@ auto day23(int argc, char **argv) -> int {
         }
 
         // move amphipod from room to hall
-        for (auto i : roomidx) {
+        // it is advantageous to try to move from rooms that are more empty
+        std::ranges::sort(idx, std::less{}, [&](auto i) {
+                auto seg = arr.col(i).segment(1L, roomsize);
+                return roomsize - std::distance(seg.begin(), std::ranges::partition_point(seg, empty));
+        });
+        for (auto i : idx) {
             auto room = arr.col(i).segment(1L, roomsize);
 
             // check if anything needs to be moved
