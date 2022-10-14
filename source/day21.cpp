@@ -96,7 +96,7 @@ auto day21(int argc, char** argv) -> int
     robin_hood::unordered_map<u64, std::array<u64, 2>> map;
     game<max_score_part2> part_two { player1, player2 };
 
-    std::array ways { 1UL, 3UL, 6UL, 7UL, 6UL, 3UL, 1UL };
+    std::array ways { 1UL, 3UL, 6UL, 7UL, 6UL, 3UL, 1UL }; // NOLINT
     auto simulate = [&](decltype(part_two) const& g, auto&& simulate) { // NOLINT
         // if game is done return win counts
         if (g.done()) {
