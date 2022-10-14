@@ -8,10 +8,10 @@
 #include <string>
 #include <vector>
 
-using i32 = int32_t;
-using i64 = int64_t;
-using u32 = uint32_t;
-using u64 = uint64_t;
+using i32 = std::int32_t;
+using i64 = std::int64_t;
+using u32 = std::uint32_t;
+using u64 = std::uint64_t;
 
 namespace util {
 inline void tokenize(std::string const& str, char delim, std::vector<std::string>& out)
@@ -45,6 +45,7 @@ auto day08(int argc, char** argv) -> int;
 auto day09(int argc, char** argv) -> int;
 auto day10(int argc, char** argv) -> int;
 auto day11(int argc, char** argv) -> int;
+auto day12(int argc, char** argv) -> int;
 auto day13(int argc, char** argv) -> int;
 auto day14(int argc, char** argv) -> int;
 auto day15(int argc, char** argv) -> int;
