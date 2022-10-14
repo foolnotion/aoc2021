@@ -14,16 +14,12 @@ auto day04(int argc, char** argv) -> int
         return 1;
     }
 
-    //std::ifstream infile(argv[1]); // NOLINT
-    //std::string line;
     scn::owning_file file(argv[1], "r");
     std::vector<std::string> lines;
     (void) scn::scan_list_ex(file, lines, scn::list_separator('\n'));
-    fmt::print("lines:\n{}\n", lines);
     std::vector<int> numbers;
     auto line = lines.begin();
     (void) scn::scan_list_ex(*line, numbers, scn::list_separator(','));
-    fmt::print("numbers: {}\n", numbers);
 
     // the remainder of the file contains the board configurations
     int rows = 0;
@@ -48,6 +44,7 @@ auto day04(int argc, char** argv) -> int
     }
 
     // part 1
+    std::array scores { 0UL, 0UL };
     std::vector<bool> bingoed(boards.size(), false);
     for (auto n : numbers) {
         size_t idx{0};
@@ -69,9 +66,7 @@ auto day04(int argc, char** argv) -> int
                             || (b.row(j) < 0).all() // row bingo
                        ) {
                         auto sum = (b < 0).select(0, b).sum();
-                        auto score = sum * n;
-                        fmt::print("bingo at board {}! n: {}, sum: {}, score: {}\n", idx, n, sum, score);
-                        std::cout << b << "\n\n";
+                        scores[scores[0] != 0] = sum * n;
                         bingoed[idx] = true;
                     }
                 }
@@ -79,5 +74,6 @@ auto day04(int argc, char** argv) -> int
             ++idx;
         }
     }
+    fmt::print("{}\n", scores);
     return 0;
 }
