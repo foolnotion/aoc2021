@@ -32,7 +32,7 @@ auto day20(int argc, char** argv) -> int
     std::getline(ff, line); // skip an empty line
 
     using point = std::array<int, 2>;
-    using image = robin_hood::unordered_map<point, bool, hash<point>>;
+    using image = robin_hood::unordered_map<point, int, hash<point>>;
     // read input
     image input;
     {
