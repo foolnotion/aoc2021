@@ -95,6 +95,16 @@ struct state_t { // NOLINT
         return i+1;
     }
 
+    // exit room, returning the amphi type and number of steps taken
+    auto exit(u32 idx) -> std::pair<u8, u32> {
+        assert(rooms[idx] != E);
+        auto i = 0;
+        while (get(idx, i) == kind::empty && i < S) { ++i; }
+        auto x = get(idx, i);
+        set(idx, i, kind::empty);
+        return { x, i+1 };
+    }
+
     // return room value at pos
     [[nodiscard]] auto get(u32 idx, u32 pos) const {
         auto v = static_cast<u8>((rooms[idx] >> (pos * n_state)) & state_mask);
@@ -116,6 +126,8 @@ struct state_t { // NOLINT
         }
         return true;
     }
+
+    [[nodiscard]] auto empty(u32 idx) const { return rooms[idx] == E; }
 
     // check if the path is clear in this range (inclusive at both ends)
     [[nodiscard]] auto path_clear(std::pair<u32, u32> range) const -> bool {
@@ -169,38 +181,31 @@ auto search(S start) -> u64 {
             auto x = s.get(i);
             if (x == kind::empty) { continue; }
             if (i < roompos[x] && !s.path_clear({i+1, roompos[x]})) { continue; }
-            if (i > roompos[x] && !s.path_clear({roompos[x], i-1})) { continue; }
-            if (s.good(x)) {
-                auto p = s;
-                auto distance = abs(i - roompos[x]) + p.enter(x);
-                p.set(i, kind::empty); // remove from hall
-                p.cost += distance * podcost[x];
-                p.hcost = p.heuristic();
-                q.push(p);
-            }
+            if (i > roompos[x] && !s.path_clear({roompos[x], i-1})) { break; }
+            if (!s.good(x)) { continue; }
+            auto p = s;
+            auto distance = abs(i - roompos[x]) + p.enter(x);
+            p.set(i, kind::empty); // remove from hall
+            p.cost += distance * podcost[x];
+            p.hcost = p.heuristic();
+            q.push(p);
         }
 
         // iterate rooms and check if amphi can move to hall
         for (auto i = 0; i < std::ssize(s.rooms); ++i) {
-            if (s.good(i)) { continue; } // this room is good, no need to do anything
-            for (auto j = 0; j < S::roomsize; ++j) {
-                auto x = s.get(i, j);
-                if (x == kind::empty) { continue; }
-
-                auto from = roompos[i];
-                for (auto k : hallpos) {
-                    if (!s.path_clear({from, k})) { continue; }
-
-                    auto p = s;
-                    auto distance = abs(from - k) + j + 1;
-                    p.set(k, x);
-                    p.set(i, j, kind::empty);
-                    p.cost += distance * podcost[x];
-                    p.hcost = p.heuristic();
-                    q.push(p);
+            if (s.empty(i) || s.good(i)) { continue; } // this room is good, no need to do anything
+            for (auto k : hallpos) {
+                if (!s.path_clear({roompos[i], k})) {
+                    if (roompos[i] < k) { break; }
+                    continue;
                 }
-
-                break;
+                auto p = s;
+                auto [x, t] = p.exit(i);
+                auto distance = abs(roompos[i] - k) + t;
+                p.set(k, x); // move to halll
+                p.cost += distance * podcost[x];
+                p.hcost = p.heuristic();
+                q.push(p);
             }
         }
     }
