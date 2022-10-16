@@ -1,107 +1,239 @@
 #include "advent.hpp"
+
 #include <fstream>
+#include <ostream>
+#include <limits>
+#include <queue>
+#include <string>
 #include <vector>
-#define XXH_INLINE_ALL
-#include <xxh3.h>
 #include <robin_hood.h>
-#include <Eigen/Core>
+
 using std::abs;
 
-constexpr std::array hallidx { 0, 1, 3, 5, 7, 9, 10 };
-constexpr std::array roomidx { 2, 4, 6, 8 };
-constexpr std::array podcost { 1, 10, 100, 1000 };
+constexpr std::array hallpos { 0L, 1L, 3L, 5L, 7L, 9L, 10L };
+constexpr std::array roompos { 2L, 4L, 6L, 8L };
+constexpr std::array podcost { 1UL, 10UL, 100UL, 1000UL };
+constexpr std::array symbols { 'A', 'B', 'C', 'D', '.' };
+
+enum kind { a, b, c, d, empty };
+
+constexpr u8 n_state{3}; // 3 bits for state (A=000, B=001, C=010, D=011, empty=100)
+constexpr u8 n_hall{33}; // 33 used bits (11 x 3)
+constexpr u8 state_mask{0x7U}; // state mask
+
+constexpr u16 A{ 0x000U }; // good state for room a NOLINT
+constexpr u16 B{ 0x249U }; // good state for room b NOLINT
+constexpr u16 C{ 0x492U }; // good state for room b NOLINT
+constexpr u16 D{ 0x6DBU }; // good state for room b NOLINT
+constexpr u16 E{ 0x924U }; // empty room state NOLINT
+                           //
+constexpr u64 hall_init{0x124924924U}; // empty hall
+constexpr u64 hall_mask{static_cast<u64>(-1) >> static_cast<u64>(std::numeric_limits<u64>::digits - n_hall)};
+constexpr std::array done { A, B, C, D };
+
+template<std::size_t S /* room capacity (2 or 4 for this puzzle) */>
+struct state_t { // NOLINT
+    u64 hall{hall_init}; // we use 33 out of 64 bits, order from right to left
+    std::array<uint16_t, roompos.size()> rooms{A, B, C, D}; // we use 12 out of 16 bits per room, order from right to left
+    u64 cost{0UL};
+    u64 hcost{0UL};
+
+    static constexpr std::size_t roomsize = S;
+
+    [[nodiscard]] auto heuristic() const {
+        u64 total = 0;
+        for (auto i : hallpos) {
+            auto x = get(i);
+            if (x == kind::empty) { continue; }
+            if (i < roompos[x] && !path_clear({i+1, roompos[x]})) {
+                return std::numeric_limits<u64>::max();
+            }
+            if (i > roompos[x] && !path_clear({roompos[x], i-1})) {
+                return std::numeric_limits<u64>::max();
+            }
+            total += abs(i - roompos[x]) * podcost[x];
+        }
+        for (auto i = 0; i < std::ssize(rooms); ++i) {
+            for (auto j = 0; j < S; ++j) {
+                auto x = get(i, j);
+                if (x == kind::empty) { continue; }
+                if (roompos[i] == roompos[x]) { continue; }
+                total += (abs(roompos[i] - roompos[x])) * podcost[x];
+                if (!path_clear({roompos[i], roompos[x]})) {
+                    return std::numeric_limits<u64>::max();
+                }
+                total += (1 + j + abs(roompos[i] - roompos[x])) * podcost[x];
+            }
+        }
+        return total;
+    };
+
+    // set room position to value val
+    auto set(u32 idx, u32 pos, u8 val) { // NOLINT
+        u16 r = rooms[idx];
+        u16 b = pos * n_state; // shift width in bits
+        u16 ones = static_cast<u16>(-1);
+        u16 m = ones << static_cast<u16>(b + n_state) | ~(ones << b);
+        u16 v = static_cast<u16>(val) << b;
+        rooms[idx] = (r & m) | v; // NOLINT
+    }
+
+    // set hall position to value val
+    auto set(u32 pos, u8 val) { // NOLINT
+        u64 b = static_cast<u64>(pos) * n_state;
+        u64 m = static_cast<u64>(-1) << (b + n_state) | ~(static_cast<u64>(-1) << b);
+        u64 v = static_cast<u64>(val) << b;
+        hall = (hall & m) | v;
+    }
+
+    // enter room, return number of steps taken inside
+    auto enter(u32 idx) {
+        assert(can_enter(idx));
+        auto i = S-1;
+        while (get(idx, i) != kind::empty && i >= 0) { --i; }
+        set(idx, i, idx);
+        return i+1;
+    }
+
+    // return room value at pos
+    [[nodiscard]] auto get(u32 idx, u32 pos) const {
+        auto v = static_cast<u8>((rooms[idx] >> (pos * n_state)) & state_mask);
+        return v;
+    }
+
+    // return hall value at pos
+    [[nodiscard]] auto get(u32 pos) const {
+        return static_cast<u8>((hall >> (pos * n_state)) & state_mask);
+    }
+
+    // can this room be entered by the correct amphi?
+    [[nodiscard]] auto good(u32 idx) const {
+        for (auto i = 0; i < S; ++i) {
+            auto x = get(idx, i);
+            if (!(x == idx || x == kind::empty)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // check if the path is clear in this range (inclusive at both ends)
+    [[nodiscard]] auto path_clear(std::pair<u32, u32> range) const -> bool {
+        auto [from, to] = range;
+        if (from > to) { return path_clear({ to, from }); }
+        for (auto i = from; i <= to; ++i) {
+            if (get(i) != kind::empty) { return false; }
+        }
+        return true;
+    }
+
+    // return true if all the amphipods are arranged
+    explicit operator bool() const {
+        return std::ranges::equal(rooms, done);
+    }
+
+    friend auto operator<(state_t a, state_t b) {
+        return a.cost + a.hcost > b.cost + b.hcost;
+    }
+
+    friend auto operator==(state_t a, state_t b) {
+        return a.hall == b.hall && std::ranges::equal(a.rooms, b.rooms);
+    }
+};
+
+template<typename S>
+struct hash {
+    auto operator()(S s) const -> u64 {
+        u64 r{0};
+        std::memcpy(&r, s.rooms.data(), s.rooms.size() * sizeof(u16));
+        return r * 31 + s.hall; // NOLINT
+    }
+};
+
+template<typename S>
+auto search(S start) -> u64 {
+    std::priority_queue<S, std::vector<S>, std::less<>> q;
+    robin_hood::unordered_set<S, hash<S>> map;
+    u64 mincost{std::numeric_limits<u64>::max()};
+
+    q.push(start);
+    while(!q.empty()) {
+        auto const s = q.top(); q.pop();
+        auto cost = s.cost + s.hcost;
+        if(s) { mincost = std::min(s.cost, mincost); continue; }
+        if (cost >= mincost) { continue; }
+        if (auto [it, ok] = map.insert(s); !ok) { continue; }
+
+        // iterate hall positions and check if amphi can move to room
+        for (auto i : hallpos) {
+            auto x = s.get(i);
+            if (x == kind::empty) { continue; }
+            if (i < roompos[x] && !s.path_clear({i+1, roompos[x]})) { continue; }
+            if (i > roompos[x] && !s.path_clear({roompos[x], i-1})) { continue; }
+            if (s.good(x)) {
+                auto p = s;
+                auto distance = abs(i - roompos[x]) + p.enter(x);
+                p.set(i, kind::empty); // remove from hall
+                p.cost += distance * podcost[x];
+                p.hcost = p.heuristic();
+                q.push(p);
+            }
+        }
+
+        // iterate rooms and check if amphi can move to hall
+        for (auto i = 0; i < std::ssize(s.rooms); ++i) {
+            if (s.good(i)) { continue; } // this room is good, no need to do anything
+            for (auto j = 0; j < S::roomsize; ++j) {
+                auto x = s.get(i, j);
+                if (x == kind::empty) { continue; }
+
+                auto from = roompos[i];
+                for (auto k : hallpos) {
+                    if (!s.path_clear({from, k})) { continue; }
+
+                    auto p = s;
+                    auto distance = abs(from - k) + j + 1;
+                    p.set(k, x);
+                    p.set(i, j, kind::empty);
+                    p.cost += distance * podcost[x];
+                    p.hcost = p.heuristic();
+                    q.push(p);
+                }
+
+                break;
+            }
+        }
+    }
+    return mincost;
+};
+
+template<typename S, std::ranges::random_access_range R>
+auto parse(R lines) {
+    S start;
+    for(auto i = 1; i < std::ssize(lines)-1; ++i) {
+        for (auto j = 0; j < std::size(lines[i]); ++j) {
+            auto c = lines[i][j];
+            if (std::isalpha(c)) {
+                start.set((j-3)/2, i-2, c-'A');
+            }
+        }
+    }
+    return start;
+}
 
 auto day23(int argc, char **argv) -> int {
-    if (argc < 2) {
-        throw std::runtime_error("argument required");
-    }
-
-    std::ifstream f(argv[1]);
-    std::string line;
-
     std::vector<std::string> lines;
-    while(std::getline(f, line)) {
-        lines.emplace_back(line);
-    }
-    Eigen::Array<char, -1, -1> arr(lines.size()-2, lines.front().size()-2);
-    for(auto i = 1; i < std::ssize(lines)-1; ++i) {
-        arr.row(i-1) = Eigen::Map<Eigen::Array<char, -1, 1>>(lines[i].data() + 1, lines[i].size() - 1);
-    }
-    auto roomsize = arr.rows() - 1;
-    robin_hood::unordered_map<u64, i64> state;
 
-    auto mincost{std::numeric_limits<u64>::max()};
-    auto done = [&](auto const& arr) {
-        return std::ranges::all_of(roomidx, [&](auto i) {
-            return (arr.col(i).segment(1, roomsize) == static_cast<char>((i-2)/2 + 'A')).all();
-        });
-    };
-    auto hall = arr.row(0);
-    auto empty = [](char c) { return c == '.'; };
+    std::ifstream part1("./input/23_part1.txt");
+    for (std::string line; std::getline(part1, line); lines.emplace_back(line));
+    auto s1 = parse<state_t<2>>(lines);
 
-    std::array idx = roomidx;
-    auto search = [&](auto&& search, int cost) {
-        auto h = XXH_INLINE_XXH3_64bits(arr.data(), arr.size());
-        if (auto [it, ok] = state.insert({h, cost}); !ok) {
-            if (cost > it->second) { return; }
-            it->second = cost;
-        }
+    lines.clear();
+    std::ifstream part2("./input/23_part2.txt");
+    for (std::string line; std::getline(part2, line); lines.emplace_back(line));
+    auto s2 = parse<state_t<4>>(lines);
 
-        if (done(arr)) {
-            mincost = cost;
-            return;
-        }
-
-        // move amphipod from hall to room
-        for (auto i : hallidx) {
-            auto c = hall(i);
-            if (c == '.') { continue; }
-            auto j = roomidx[c-'A'];
-            if (i < j && (hall.segment(i+1, j-i) != '.').any()) { continue; } // path blocked
-            if (i > j && (hall.segment(j, i-j-1) != '.').any()) { continue; } // path blocked
-
-            auto room = arr.col(j).segment(1, roomsize);
-            if ((room == c || room == '.').all()) {
-                auto it = std::ranges::partition_point(room, empty);
-                auto r = std::distance(room.begin(), it);
-                auto d = (r + abs(i - j)) * podcost[c - 'A'];
-                if (cost + d >= mincost) { continue; }
-
-                std::swap(hall(i), arr(r, j));
-                search(search, cost + d);
-                std::swap(hall(i), arr(r, j));
-            }
-        }
-
-        // move amphipod from room to hall
-        // it is advantageous to try to move from rooms that are more empty
-        std::ranges::sort(idx, std::less{}, [&](auto i) {
-                auto seg = arr.col(i).segment(1L, roomsize);
-                return roomsize - std::distance(seg.begin(), std::ranges::partition_point(seg, empty));
-        });
-        for (auto i : idx) {
-            auto room = arr.col(i).segment(1L, roomsize);
-
-            // check if anything needs to be moved
-            auto it = std::ranges::partition_point(room, empty);
-            if (it == room.end()) { continue; } // this room is empty
-            if ((room == (i-2)/2+'A' || room == '.').all()) { continue; } // room is ok as is
-            auto c = *it;
-            auto r = std::distance(room.begin(), it) + 1;
-
-            for (auto j : hallidx) {
-                if (hall(j) != '.') { continue; } // this position is occupied by an amphipod
-                if ((hall.segment(std::min(i, j), abs(i-j)) != '.').any()) { continue; } // path blocked
-                auto d = (r + abs(i - j)) * podcost[c - 'A'];
-                if (cost + d >= mincost) { continue; }
-
-                std::swap(hall(j), arr(r, i));
-                search(search, cost + d);
-                std::swap(hall(j), arr(r, i));
-            }
-        }
-    };
-    search(search, 0UL);
-    fmt::print("min cost: {}\n", mincost);
+    fmt::print("part 1: {}\n", search(s1));
+    fmt::print("part 2: {}\n", search(s2));
     return 0;
 }

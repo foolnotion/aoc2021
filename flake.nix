@@ -30,7 +30,7 @@
                 gdb
                 hotspot
                 hyperfine
-                linuxPackages.perf
+                linuxPackages_latest.perf
                 mdspan
                 openlibm
                 pkg-config
